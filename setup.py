@@ -13,7 +13,8 @@ setup(
     include_package_data=True,
     install_requires=[
       'klein',
-      'treq'
+      'treq',
+      'Twisted>=13.1.0'
     ],
     classifiers=[
         'Development Status :: 4 - Beta',
