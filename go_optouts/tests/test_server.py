@@ -1,4 +1,4 @@
-from app import app
+from go_optouts.app import app
  
 import treq
  
