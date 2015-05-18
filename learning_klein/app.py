@@ -1,4 +1,4 @@
-#--------------------------------Hello World----------------------------------------------------
+# Hello World
 import json
 
 from klein import Klein
@@ -8,42 +8,34 @@ class App(object):
     app = Klein()
 
     def __init__(self):
-        self._info = {"Contact":[
-            {"msg":"Hello world!", "Cell_No":27712345678, "Email": "trevor@gmail.com"},
-            {"msg":"Hello world is done", "Cell_No":27849485738, "Email": "october@gmail.com"}
-         ]}
-      
+        self._info = {"Contact": [
+            {"msg": "Hello", "Cell_No": 712345678, "Email": "trev@gmail.com"},
+            {"msg": "Hello2", "Cell_No": 849485738, "Email": "oct@gmail.com"}
+        ]}
+
     @app.route('/Hello')
     def hello(self, request):
-          return 'Hello, world!'
+        return 'Hello, world!'
 
-
-    #-----------------------------------------Adding Routes----------------------------------------------
+# Adding Routes
 
     @app.route('/AR')
     def pg_root(self, request):
-    	return 'I am the root page!'
+        return 'I am the root page!'
 
-
-
-    #-----------------------------------------Variable Routes----------------------------------------------
+# Variable Routes
 
     @app.route('/VR/<username>')
-    def pg_VR(self, request, username):
+    def pg_vr(self, request, username):
         return 'Hi %s!' % (username,)
 
-
-    #-----------------------------------------Route Order Matters---------------------------------------------
-
-
+# Route Order Matters-
 
     @app.route('/ROM/bob')
     def pg_user_bob(self, request):
         return 'Hello there bob!'
 
-#--------------------------------------Using Non-Global State------------------------------------------------
-
-    
+# Using Non-Global State
 
     @app.route('/')
     def items(self, request):

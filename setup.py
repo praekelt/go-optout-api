@@ -12,6 +12,8 @@ setup(
     packages=find_packages(),
     include_package_data=True,
     install_requires=[
+        'klein',
+        'treq',
         'Twisted>=13.1.0'
     ],
     classifiers=[
