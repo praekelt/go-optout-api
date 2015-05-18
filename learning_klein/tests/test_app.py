@@ -55,7 +55,7 @@ class TestApp(TestCase):
         resp = yield treq.get("%s/infor/Contact" % (self.url,), persistent=False)
         data = yield resp.json()
         expected = [
-        {"msg": "Hello", "Cell_No": 712345678, "Email": "trev@gmail.com"},
-        {"msg": "Hello2", "Cell_No": 849485738, "Email": "oct@gmail.com"}
+            {"msg": "Hello", "Cell_No": 712345678, "Email": "trev@gmail.com"},
+            {"msg": "Hello2", "Cell_No": 849485738, "Email": "oct@gmail.com"}
         ]
         self.assertEqual(data, expected)
