@@ -11,7 +11,7 @@ class App(object):
         self._info = {"Contact": [
             {"msg": "Hello", "Cell_No": 712345678, "Email": "trev@gmail.com"},
             {"msg": "Hello2", "Cell_No": 849485738, "Email": "oct@gmail.com"}
-            ]}
+        ]}
 
     @app.route('/Hello')
     def hello(self, request):
