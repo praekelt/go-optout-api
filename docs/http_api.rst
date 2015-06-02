@@ -1,8 +1,11 @@
 Opt outs http api
-=================
+-----------------
 
 .. http:get:: /optouts/(str:address_type)/(str:address)
 
+    :statuscode 200: no error
+    :statuscode 404: there's no opt out for this contact
+    
    **Request**
 
    .. sourcecode:: http
@@ -32,8 +35,7 @@ Opt outs http api
         }
       ]
 
-    :statuscode 200: no error
-    :statuscode 404: there's no opt out for this contact
+    
 
 .. http:put:: /optouts/(str:address_type)/(str:address)
 
