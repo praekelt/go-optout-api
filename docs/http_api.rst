@@ -1,14 +1,22 @@
-Opt outs http api
+Opt Outs HTTP API
 =================
 
+This API is used to retrieve and update opt out information for addresses.
+
+
+API Methods
+-----------
+
 .. http:get:: /optouts/(str:address_type)/(str:address)
+
+   Retrieve the opt out for an address.
 
    **Request**
 
    .. sourcecode:: http
 
-      GET /optouts/msisdn/"+273121100"
-      Host: example.com 
+      GET /optouts/msisdn/%2B273121100
+      Host: example.com
       Accept: application/json
 
    **Response**
@@ -19,60 +27,69 @@ Opt outs http api
       Vary: accept
       Content-type: application/json
 
-      [
-        {
-        "id": 2468,
-        "address-type": "msisdn",
+      {
+        "id": "2468"",
+        "address_type": "msisdn",
         "address": "+273121100"
-        },
-        {
-        "id": 8642,
-        "address-type": "twitter",
-        "address": "@vumi-app"
-        }
-      ]
+      }
 
-    :statuscode 200: no error
-    :statuscode 404: there's no opt out for this contact
+   :statuscode 200: no error
+   :statuscode 404: there's no opt out for this contact
+
 
 .. http:put:: /optouts/(str:address_type)/(str:address)
 
-    **Request**
+   Store a record of an opt out for an address.
 
-    .. sourcecode:: http
-    
-       PUT /optouts/facebook/"@fb-app"
-       Host: example.com 
-       Accept: application/json
+   **Request**
 
-       {"address-type": "facebook", "address": "@fb-app"}
+   .. sourcecode:: http
 
-    **Response**
+      PUT /optouts/facebook/fb-app
+      Host: example.com
+      Accept: application/json
 
-    .. sourcecode:: http
+   **Response**
 
-       HTTP/1.1 200 OK
-       Vary: accept
-       Content-type: application/json
+   .. sourcecode:: http
 
-       {..., "address": "@fb-app", ""address-type": "facebook", ...}
+      HTTP/1.1 200 OK
+      Vary: accept
+      Content-type: application/json
 
-.. http:delete:: /optouts/(str:address_type)/01dfae6e5d4d90d9892622325959afbe
-    
-    **Request**
+      {
+        "id": "1234",
+        "address": "fb-app",
+        "address_type": "facebook"
+      }
 
-    .. sourcecode:: http
+   :statuscode 200: opt out created
 
-       DELETE /optouts/twitter/01dfae6e5d4d90d9892622325959afbe
-       Host: axample.com
-       Accept: application/json
 
-    **Response**
+.. http:delete:: /optouts/(str:address_type)/(str:address)
 
-    .. sourcecode:: http
+   Remove an opt out for an address.
 
-       HTTP/1.1 200 OK
-       Vary: accept
-       Content-type: application/json
+   **Request**
 
-       {..., "id": "68e456a0c8da43bea162839a9a1669c0", ...}
+   .. sourcecode:: http
+
+      DELETE /optouts/twitter/%40twitter_handle
+      Host: example.com
+      Accept: application/json
+
+   **Response**
+
+   .. sourcecode:: http
+
+      HTTP/1.1 200 OK
+      Vary: accept
+      Content-type: application/json
+
+      {
+        "id": "5678",
+        "address": "@twitter_handle",
+        "address_type": "twitter"
+      }
+
+   :statuscode 200: opt out deleted
