@@ -13,6 +13,7 @@ class API(object):
             {"id": "5678", "address_type": "twitter",
              "address": "@twitter_handle"}
         ]
+# Get Opt Out Address
 
     def get_opt_out(self, addresstype, address):
         opt_outs = [
@@ -23,37 +24,23 @@ class API(object):
             return opt_outs[0]
         return None
 
-    def save_opt_out(self, addresstype, address):
-        opt_out = {
-            "id": "2211",
-            "address_type": addresstype,
-            "address": address,
-        }
-        self._optouts.append(opt_out)
-        return opt_out
+# GET Method
 
     @app.route('/')
     def addresses(self, request):
-        request.setHeader('Content-Type', 'application/json')
-        return json.dumps(self._info)
-
-# GET Method
+            request.setHeader('Content-Type', 'application/json')
+            return json.dumps(self._info)
 
     @app.route('/optouts/<string:addresstype>/<string:address>',
                methods=['GET'])
     def get_address(self, request, addresstype, address):
         opt_out = self.get_opt_out(addresstype, address)
         if opt_out is None:
-            # TODO: return 404
-            return "Eep."
-        request.setHeader('Content-Type', 'application/json')
-        return json.dumps(opt_out)
+            # return 404 Not Found
+            request.setResponseCode(404)
+            return "theres no opt out for this contact."
 
-# PUT Method
-
-    @app.route('/optouts/<string:addresstype>/<string:address>',
-               methods=['PUT'])
-    def save_address(self, request, addresstype, address):
-        opt_out = self.save_opt_out(addresstype, address)
+        # return 200 OK
+        request.setResponseCode(200)
         request.setHeader('Content-Type', 'application/json')
         return json.dumps(opt_out)

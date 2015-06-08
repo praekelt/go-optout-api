@@ -25,15 +25,19 @@ class TestApi(TestCase):
     @inlineCallbacks
     def stop_server(self):
         yield self.server.loseConnection()
+
+    def api_call(self, path):
+        return treq.get("%s%s" % (self.url, path), persistent=False)
+
 # Tests
 
     @inlineCallbacks
-    def test_address(self):
-        resp = yield treq.get("%s/optouts/addresses" % (self.url,), persistent=False)
+    def test_opt_out_found(self):
+        resp = yield self.api_call("/optouts/msisdn/+273121100")
+        self.assertEqual(resp.code, 200)
         data = yield resp.json()
-        expected = [
-            {"id": "2468", "address_type": "msisdn", "address": "+273121100"},
-            {"id": "1234", "address_type": "facebook", "address": "fb-app"},
-            {"id": "5678", "address_type": "twitter", "address": "@twitter_handle"}
-        ]
-        self.assertEqual(data, expected)
+        self.assertEqual(data, {
+            "id": "2468",
+            "address_type": "msisdn",
+            "address": "+273121100",
+        })
