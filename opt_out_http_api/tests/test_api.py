@@ -37,9 +37,15 @@ class TestApi(TestCase):
         self.assertEqual(resp.code, 200)
         data = yield resp.json()
         self.assertEqual(data, {
-            "id": "2468",
-            "address_type": "msisdn",
-            "address": "+273121100",
+            "status": {
+                "code": 200,
+                "reason": "OK",
+            },
+            "optout": {
+                "id": "2468",
+                "address_type": "msisdn",
+                "address": "+273121100",
+            },
         })
 
     @inlineCallbacks
@@ -47,4 +53,9 @@ class TestApi(TestCase):
         resp = yield self.api_call("/optouts/mxit/+369963")
         self.assertEqual(resp.code, 404)
         data = yield resp.json()
-        self.assertEqual(data, None)
+        self.assertEqual(data, {
+            "status": {
+                "code": 404,
+                "reason": "Opt out not found.",
+            },
+        })

@@ -7,6 +7,10 @@ class OptOutNotFound(Exception):
     """ Raised when no opt out is found. """
 
 
+class OptOutFound(Exception):
+    """ Raised when opt out is found. """
+
+
 class API(object):
     app = Klein()
 
@@ -33,7 +37,28 @@ class API(object):
     def opt_out_not_found(self, request, failure):
         request.setResponseCode(404)
         request.setHeader('Content-Type', 'application/json')
-        return json.dumps(None)
+        return json.dumps({
+            "status": {
+                "code": 404,
+                "reason": "Opt out not found.",
+            },
+        })
+
+    @app.handle_errors(OptOutFound)
+    def opt_out_found(self, request, failure):
+        request.setResponseCode(200)
+        request.setHeader('Content-Type', 'application/json')
+        return json.dumps({
+            "status": {
+                "code": 200,
+                "reason": "OK",
+            },
+            "optout": {
+                "id": "2468",
+                "address_type": "msisdn",
+                "address": "+273121100",
+            },
+        })
 
 # GET Method
 
@@ -50,6 +75,4 @@ class API(object):
             raise OptOutNotFound()
 
         # return 200 OK
-        request.setResponseCode(200)
-        request.setHeader('Content-Type', 'application/json')
-        return json.dumps(opt_out)
+        raise OptOutFound()
