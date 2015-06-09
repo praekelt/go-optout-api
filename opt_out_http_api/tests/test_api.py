@@ -41,3 +41,10 @@ class TestApi(TestCase):
             "address_type": "msisdn",
             "address": "+273121100",
         })
+
+    @inlineCallbacks
+    def test_opt_out_not_found(self):
+        resp = yield self.api_call("/optouts/mxit/+369963")
+        self.assertEqual(resp.code, 404)
+        data = yield resp.json()
+        self.assertEqual(data, None)

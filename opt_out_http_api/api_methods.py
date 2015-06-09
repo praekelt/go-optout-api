@@ -38,7 +38,8 @@ class API(object):
         if opt_out is None:
             # return 404 Not Found
             request.setResponseCode(404)
-            return "theres no opt out for this contact."
+            request.setHeader('Content-Type', 'application/json')
+            return json.dumps(None)
 
         # return 200 OK
         request.setResponseCode(200)
