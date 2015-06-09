@@ -3,6 +3,10 @@ import json
 from klein import Klein
 
 
+class OptOutNotFound(Exception):
+    """ Raised when no opt out is found. """
+
+
 class API(object):
     app = Klein()
 
@@ -13,6 +17,7 @@ class API(object):
             {"id": "5678", "address_type": "twitter",
              "address": "@twitter_handle"}
         ]
+
 # Get Opt Out Address
 
     def get_opt_out(self, addresstype, address):
@@ -23,6 +28,12 @@ class API(object):
         if opt_outs:
             return opt_outs[0]
         return None
+
+    @app.handle_errors(OptOutNotFound)
+    def opt_out_not_found(self, request, failure):
+        request.setResponseCode(404)
+        request.setHeader('Content-Type', 'application/json')
+        return json.dumps(None)
 
 # GET Method
 
@@ -36,10 +47,7 @@ class API(object):
     def get_address(self, request, addresstype, address):
         opt_out = self.get_opt_out(addresstype, address)
         if opt_out is None:
-            # return 404 Not Found
-            request.setResponseCode(404)
-            request.setHeader('Content-Type', 'application/json')
-            return json.dumps(None)
+            raise OptOutNotFound()
 
         # return 200 OK
         request.setResponseCode(200)
