@@ -41,7 +41,7 @@ class TestApi(TestCase):
                 "code": 200,
                 "reason": "OK",
             },
-            "optout": {
+            "opt_out": {
                 "id": "2468",
                 "address_type": "msisdn",
                 "address": "+273121100",
