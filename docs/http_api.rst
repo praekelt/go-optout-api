@@ -64,7 +64,7 @@ API Methods
       }
 
    :statuscode 200: opt out created
-   :statuscode 404: error while inserting data
+   :statuscode 409: opt out already exists
 
 
 .. http:delete:: /optouts/(str:address_type)/(str:address)
