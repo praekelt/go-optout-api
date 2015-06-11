@@ -64,6 +64,7 @@ API Methods
       }
 
    :statuscode 200: opt out created
+   :statuscode 404: error while inserting data
 
 
 .. http:delete:: /optouts/(str:address_type)/(str:address)
@@ -93,3 +94,4 @@ API Methods
       }
 
    :statuscode 200: opt out deleted
+   :statuscode 404: there's nothing to delete
