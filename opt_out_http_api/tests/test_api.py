@@ -29,6 +29,8 @@ class TestApi(TestCase):
     def api_call(self, path):
         return treq.get("%s%s" % (self.url, path), persistent=False)
 
+    def api_put(self, path):
+        return treq.put("%s%s" % (self.url, path), persistent=False)
 # Tests
 
     @inlineCallbacks
@@ -57,5 +59,34 @@ class TestApi(TestCase):
             "status": {
                 "code": 404,
                 "reason": "Opt out not found.",
+            },
+        })
+
+    @inlineCallbacks
+    def test_opt_out_created(self):
+        resp = yield self.api_put("/optouts/linkedin/+1029384756")
+        self.assertEqual(resp.code, 200)
+        data = yield resp.json()
+        self.assertEqual(data, {
+            "status": {
+                "code": 200,
+                "reason": "OK",
+            },
+            "opt_out": {
+                "id": "6666",
+                "address_type": "linkedin",
+                "address": "+1029384756"
+            },
+        })
+
+    @inlineCallbacks
+    def test_opt_out_conflict(self):
+        response = yield self.api_put("/optouts/msisdn/+273121100")
+        self.assertEqual(response.code, 409)
+        data = yield response.json()
+        self.assertEqual(data, {
+            "status": {
+                "code": 409,
+                "reason": "opt out already exists."
             },
         })
