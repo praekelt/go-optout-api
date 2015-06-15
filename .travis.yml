@@ -6,4 +6,4 @@ install:
   - "pip install -r requirements.txt --use-wheel"
   - "python setup.py install"
 script:
-  - trial learning_klein
+  - trial opt_out_http_api
