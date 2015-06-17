@@ -1,5 +1,6 @@
 from opt_out_http_api.api_methods import API
 import treq
+import uuid
 from twisted.trial.unittest import TestCase
 from twisted.web.server import Site
 from twisted.internet import reactor
@@ -64,6 +65,9 @@ class TestApi(TestCase):
 
     @inlineCallbacks
     def test_opt_out_created(self):
+        def fixed_uuid():
+            return '1234'
+        self.patch(uuid, 'uuid4', fixed_uuid)
         resp = yield self.api_put("/optouts/linkedin/+1029384756")
         self.assertEqual(resp.code, 200)
         data = yield resp.json()
@@ -73,7 +77,7 @@ class TestApi(TestCase):
                 "reason": "OK",
             },
             "opt_out": {
-                "id": "00010203-0405-0607-0809-0a0b0c0d0e0f",
+                "id": "1234",
                 "address_type": "linkedin",
                 "address": "+1029384756"
             },

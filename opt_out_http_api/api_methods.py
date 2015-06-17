@@ -34,12 +34,11 @@ class API(object):
         return None
 
 # Save Opt Out Address
-    # print
 
     def save_opt_out(self, addresstype, address):
-        x = uuid.UUID('{00010203-0405-0607-0809-0a0b0c0d0e0f}')
+        opt_id = str(uuid.uuid4())
         opt_out = {
-            "id": str(x),
+            "id": opt_id,
             "address_type": addresstype,
             "address": address,
         }
