@@ -1,4 +1,5 @@
 import json
+import uuid
 
 from klein import Klein
 
@@ -7,13 +8,16 @@ class OptOutNotFound(Exception):
     """ Raised when no opt out is found. """
 
 
+class OptOutAlreadyExists(Exception):
+    """ Raised when opt out already exists. """
+
+
 class API(object):
     app = Klein()
 
     def __init__(self):
         self._optouts = [
             {"id": "2468", "address_type": "msisdn", "address": "+273121100"},
-            {"id": "1234", "address_type": "facebook", "address": "fb-app"},
             {"id": "5678", "address_type": "twitter",
              "address": "@twitter_handle"}
         ]
@@ -29,10 +33,17 @@ class API(object):
             return opt_outs[0]
         return None
 
-    @app.handle_errors(OptOutNotFound)
-    def opt_out_not_found(self, request, failure):
-        return self.response(
-            request, status_code=404, status_reason="Opt out not found.")
+# Save Opt Out Address
+
+    def save_opt_out(self, addresstype, address):
+        opt_id = str(uuid.uuid4())
+        opt_out = {
+            "id": opt_id,
+            "address_type": addresstype,
+            "address": address,
+        }
+        self._optouts.append(opt_out)
+        return opt_out
 
     def response(self, request, status_code=200, status_reason="OK", **data):
         request.setResponseCode(status_code)
@@ -45,7 +56,20 @@ class API(object):
         })
         return json.dumps(data)
 
-# GET Method
+# Error Handling
+
+    @app.handle_errors(OptOutNotFound)
+    def opt_out_not_found(self, request, failure):
+        return self.response(
+            request, status_code=404, status_reason="Opt out not found.")
+
+    @app.handle_errors(OptOutAlreadyExists)
+    def opt_out_already_exists(self, request, failure):
+        return self.response(
+            request, status_code=409, status_reason="Opt out already exists.")
+
+
+# Methods
 
     @app.route('/')
     def addresses(self, request):
@@ -58,4 +82,13 @@ class API(object):
         opt_out = self.get_opt_out(addresstype, address)
         if opt_out is None:
             raise OptOutNotFound()
+        return self.response(request, opt_out=opt_out)
+
+    @app.route('/optouts/<string:addresstype>/<string:address>',
+               methods=['PUT'])
+    def save_address(self, request, addresstype, address):
+        opt_out = self.get_opt_out(addresstype, address)
+        if opt_out is not None:
+            raise OptOutAlreadyExists()
+        opt_out = self.save_opt_out(addresstype, address)
         return self.response(request, opt_out=opt_out)
