@@ -32,6 +32,9 @@ class TestApi(TestCase):
 
     def api_put(self, path):
         return treq.put("%s%s" % (self.url, path), persistent=False)
+
+    def api_delete(self, path):
+        return treq.delete("%s%s" % (self.url, path), persistent=False)
 # Tests
 
     @inlineCallbacks
@@ -92,5 +95,34 @@ class TestApi(TestCase):
             "status": {
                 "code": 409,
                 "reason": "Opt out already exists."
+            },
+        })
+
+    @inlineCallbacks
+    def test_opt_out_deleted(self):
+        resp = yield self.api_delete("/optouts/twitter/@twitter_handle")
+        self.assertEqual(resp.code, 200)
+        data = yield resp.json()
+        self.assertEqual(data, {
+            "status": {
+                "code": 200,
+                "reason": "OK",
+            },
+            "opt_out": {
+                "id": "5678",
+                "address_type": "twitter",
+                "address": "@twitter_handle"
+            },
+        })
+
+    @inlineCallbacks
+    def test_opt_out_nothing_to_delete(self):
+        response = yield self.api_delete("/optouts/whatsapp/+2716230199")
+        self.assertEqual(response.code, 404)
+        data = yield response.json()
+        self.assertEqual(data, {
+            "status": {
+                "code": 404,
+                "reason": "There\'s nothing to delete."
             },
         })

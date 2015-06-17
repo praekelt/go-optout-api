@@ -12,6 +12,10 @@ class OptOutAlreadyExists(Exception):
     """ Raised when opt out already exists. """
 
 
+class OptOutNotDeleted(Exception):
+    """ Raised when opt out not deleted. """
+
+
 class API(object):
     app = Klein()
 
@@ -68,6 +72,12 @@ class API(object):
         return self.response(
             request, status_code=409, status_reason="Opt out already exists.")
 
+    @app.handle_errors(OptOutNotDeleted)
+    def opt_out_not_deleted(self, request, failure):
+        return self.response(
+            request, status_code=404,
+            status_reason="There\'s nothing to delete.")
+
 
 # Methods
 
@@ -91,4 +101,12 @@ class API(object):
         if opt_out is not None:
             raise OptOutAlreadyExists()
         opt_out = self.save_opt_out(addresstype, address)
+        return self.response(request, opt_out=opt_out)
+
+    @app.route('/optouts/<string:addresstype>/<string:address>',
+               methods=['DELETE'])
+    def delete_address(self, request, addresstype, address):
+        opt_out = self.get_opt_out(addresstype, address)
+        if opt_out is None:
+            raise OptOutNotDeleted()
         return self.response(request, opt_out=opt_out)
