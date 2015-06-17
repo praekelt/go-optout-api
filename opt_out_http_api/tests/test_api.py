@@ -73,7 +73,7 @@ class TestApi(TestCase):
                 "reason": "OK",
             },
             "opt_out": {
-                "id": "6666",
+                "id": "00010203-0405-0607-0809-0a0b0c0d0e0f",
                 "address_type": "linkedin",
                 "address": "+1029384756"
             },
@@ -87,6 +87,6 @@ class TestApi(TestCase):
         self.assertEqual(data, {
             "status": {
                 "code": 409,
-                "reason": "opt out already exists."
+                "reason": "Opt out already exists."
             },
         })

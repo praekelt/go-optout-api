@@ -1,4 +1,5 @@
 import json
+import uuid
 
 from klein import Klein
 
@@ -8,7 +9,7 @@ class OptOutNotFound(Exception):
 
 
 class OptOutAlreadyExists(Exception):
-    """ """
+    """ Raised when opt out already exists. """
 
 
 class API(object):
@@ -33,10 +34,12 @@ class API(object):
         return None
 
 # Save Opt Out Address
+    # print
 
     def save_opt_out(self, addresstype, address):
+        x = uuid.UUID('{00010203-0405-0607-0809-0a0b0c0d0e0f}')
         opt_out = {
-            "id": "6666",
+            "id": str(x),
             "address_type": addresstype,
             "address": address,
         }
@@ -64,7 +67,7 @@ class API(object):
     @app.handle_errors(OptOutAlreadyExists)
     def opt_out_already_exists(self, request, failure):
         return self.response(
-            request, status_code=409, status_reason="opt out already exists.")
+            request, status_code=409, status_reason="Opt out already exists.")
 
 
 # Methods
@@ -73,7 +76,6 @@ class API(object):
     def addresses(self, request):
             request.setHeader('Content-Type', 'application/json')
             return json.dumps(self._info)
-# GET Method
 
     @app.route('/optouts/<string:addresstype>/<string:address>',
                methods=['GET'])
@@ -82,8 +84,6 @@ class API(object):
         if opt_out is None:
             raise OptOutNotFound()
         return self.response(request, opt_out=opt_out)
-
-# PUT Method
 
     @app.route('/optouts/<string:addresstype>/<string:address>',
                methods=['PUT'])
