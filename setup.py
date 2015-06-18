@@ -14,7 +14,9 @@ setup(
     install_requires=[
         'klein',
         'treq',
-        'Twisted>=13.1.0'
+        'Twisted>=13.1.0',
+        'vumi>=0.5.4',
+        'vumi-go',
     ],
     classifiers=[
         'Development Status :: 4 - Beta',
