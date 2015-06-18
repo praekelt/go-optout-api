@@ -49,6 +49,12 @@ class API(object):
         self._optouts.append(opt_out)
         return opt_out
 
+    def delete_opt_out(self, addresstype, address):
+        opt_out = self.get_opt_out(addresstype, address)
+        if opt_out is not None:
+            self._optouts.remove(opt_out)
+        return opt_out
+
     def response(self, request, status_code=200, status_reason="OK", **data):
         request.setResponseCode(status_code)
         request.setHeader('Content-Type', 'application/json')
@@ -106,7 +112,7 @@ class API(object):
     @app.route('/optouts/<string:addresstype>/<string:address>',
                methods=['DELETE'])
     def delete_address(self, request, addresstype, address):
-        opt_out = self.get_opt_out(addresstype, address)
+        opt_out = self.delete_opt_out(addresstype, address)
         if opt_out is None:
             raise OptOutNotDeleted()
         return self.response(request, opt_out=opt_out)
