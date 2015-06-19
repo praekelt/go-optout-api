@@ -49,6 +49,8 @@ class API(object):
         self._optouts.append(opt_out)
         return opt_out
 
+# Delete Opt Out Address
+
     def delete_opt_out(self, addresstype, address):
         opt_out = self.get_opt_out(addresstype, address)
         if opt_out is not None:
