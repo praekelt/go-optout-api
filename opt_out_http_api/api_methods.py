@@ -122,6 +122,6 @@ class API(object):
         return self.response(request, opt_out=opt_out)
 
     @app.route('/optouts/count', methods=['GET'])
-    def count_address(self, request):
+    def get_opt_out_count(self, request):
         count = self.count_opt_outs()
         return self.response(request, opt_out_count=count)
