@@ -18,8 +18,8 @@ class TestApi(TestCase):
 
     @inlineCallbacks
     def start_server(self):
-        app = API()
-        self.server = yield reactor.listenTCP(0, Site(app.app.resource()))
+        self.app = API()
+        self.server = yield reactor.listenTCP(0, Site(self.app.app.resource()))
         addr = self.server.getHost()
         self.url = "http://%s:%s" % (addr.host, addr.port)
 
@@ -35,6 +35,13 @@ class TestApi(TestCase):
 
     def api_delete(self, path):
         return treq.delete("%s%s" % (self.url, path), persistent=False)
+
+    def api_count(self, path):
+        return treq.get("%s%s" % (self.url, path), persistent=False)
+
+    def add_opt_out(self, address_type, address):
+        self.app.save_opt_out(address_type, address)
+
 # Tests
 
     @inlineCallbacks
@@ -124,5 +131,32 @@ class TestApi(TestCase):
             "status": {
                 "code": 404,
                 "reason": "There\'s nothing to delete."
+            },
+        })
+
+    @inlineCallbacks
+    def test_opt_out_count_two_opt_outs(self):
+        resp = yield self.api_count("/optouts/count")
+        self.assertEqual(resp.code, 200)
+        data = yield resp.json()
+        self.assertEqual(data, {
+            "opt_out_count": 2,
+            "status": {
+                "code": 200,
+                "reason": "OK"
+            },
+        })
+
+    @inlineCallbacks
+    def test_opt_out_count_three_opt_outs(self):
+        self.add_opt_out("msisdn", "+271345")
+        resp = yield self.api_count("/optouts/count")
+        self.assertEqual(resp.code, 200)
+        data = yield resp.json()
+        self.assertEqual(data, {
+            "opt_out_count": 3,
+            "status": {
+                "code": 200,
+                "reason": "OK"
             },
         })

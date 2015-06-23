@@ -57,6 +57,9 @@ class API(object):
             self._optouts.remove(opt_out)
         return opt_out
 
+    def count_opt_outs(self):
+        return len(self._optouts)
+
     def response(self, request, status_code=200, status_reason="OK", **data):
         request.setResponseCode(status_code)
         request.setHeader('Content-Type', 'application/json')
@@ -85,7 +88,6 @@ class API(object):
         return self.response(
             request, status_code=404,
             status_reason="There\'s nothing to delete.")
-
 
 # Methods
 
@@ -118,3 +120,8 @@ class API(object):
         if opt_out is None:
             raise OptOutNotDeleted()
         return self.response(request, opt_out=opt_out)
+
+    @app.route('/optouts/count', methods=['GET'])
+    def count_address(self, request):
+        count = self.count_opt_outs()
+        return self.response(request, opt_out_count=count)
