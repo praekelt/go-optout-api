@@ -98,6 +98,8 @@ API Methods
 
 .. http:get:: /optouts/count
 
+   Return the number of opt out
+
    **Request**
 
    .. sourcecode:: http
@@ -117,4 +119,6 @@ API Methods
       {
         "opt_out_count": 3
       }
+      
+   :statuscode 200: no error
 
