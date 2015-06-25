@@ -95,3 +95,30 @@ API Methods
 
    :statuscode 200: opt out deleted
    :statuscode 404: there's nothing to delete
+
+.. http:get:: /optouts/count
+
+   Return the number of opt outs.
+
+   **Request**
+
+   .. sourcecode:: http
+
+      GET /optouts/count
+      Host: example.com
+      Accept: application/json
+
+   **Response**
+
+   .. sourcecode:: http
+
+      HTTP/1.1 200 OK
+      Vary: accept
+      Content-type: application/json
+
+      {
+        "opt_out_count": 3
+      }
+      
+   :statuscode 200: no error
+
