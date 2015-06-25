@@ -98,7 +98,7 @@ API Methods
 
 .. http:get:: /optouts/count
 
-   Return the number of opt out
+   Return the number of opt outs.
 
    **Request**
 
