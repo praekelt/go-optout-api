@@ -15,6 +15,6 @@ class OptOutStore(zope.interface.Interface):
             """ Remove an opt out for an address. """
             pass
 
-        def count(opt_out_count):
+        def count():
             """ Return the number of opt outs. """
             pass
