@@ -1,4 +1,4 @@
-import zope.interface
+from zope.interface import implements
 from interface import IOptOutStore
 
 
@@ -16,7 +16,7 @@ class OptOutMemory(object):
         }
     """
 
-    zope.interface.implements(IOptOutStore)
+    implements(IOptOutStore)
 
     def __init__(self):
         # _store maps (address_type, address) pairs to opt outs
