@@ -1,5 +1,6 @@
 from zope.interface import implements
 from interface import IOptOutStore
+import uuid
 
 
 class OptOutMemory(object):
@@ -26,9 +27,14 @@ class OptOutMemory(object):
         return self._store.get((address_type, address))
 
     def put(self, address_type, address):
-        return self._store.update(
-            {'address_type': address_type,
-             'address': address})
+        key = (address_type, address)
+        opt_id = str(uuid.uuid4())
+        self._store[key] = {
+            'id': opt_id,
+            'address_type': address_type,
+            'address': address
+        }
+        return self._store.get(key)
 
     def delete(self, address_type, address):
         return self._store.remove((address_type, address))

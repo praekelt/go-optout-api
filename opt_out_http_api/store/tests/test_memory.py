@@ -8,16 +8,24 @@ from twisted.trial.unittest import TestCase
 
 
 class TestMemory(TestCase):
-    def test_setup(self):
-        store = OptOutMemory()
-        assert verifyObject(IOptOutStore, store)
-
     def test_setup_class_iface(self):
-        assert verifyClass(IOptOutStore, OptOutMemory)
+        self.assertTrue(verifyClass(IOptOutStore, OptOutMemory))
 
     def test_setup_instance_iface(self):
-        assert verifyObject(IOptOutStore, OptOutMemory())
+        self.assertTrue(verifyObject(IOptOutStore, OptOutMemory()))
 
-    def test_get(self):
+    def test_put_and_get(self):
         store = OptOutMemory()
-        assert (IOptOutStore.get, store)
+        opt1 = store.put("twitter_handle", "@trevor")
+        self.assertEqual(len(opt1["id"]), 36)  # length of uuid-4 string
+        self.assertEqual(opt1, {
+            "id": opt1["id"],
+            "address_type": "twitter_handle",
+            "address": "@trevor"
+        })
+        opt2 = store.get("twitter_handle", "@trevor")
+        self.assertEqual(opt2, {
+            "id": opt1["id"],
+            "address_type": "twitter_handle",
+            "address": "@trevor"
+        })
