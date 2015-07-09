@@ -29,3 +29,30 @@ class TestMemory(TestCase):
             "address_type": "twitter_handle",
             "address": "@trevor"
         })
+
+    def test_delete_missing(self):
+        store = OptOutMemory()
+        opt_out_delete = store.delete("twitter_handle", "@trevor")
+        self.assertEqual(None, opt_out_delete)
+
+    def test_put_and_delete(self):
+        store = OptOutMemory()
+        opt_put = store.put("facebook", "trevor_fb")
+        self.assertEqual(len(opt_put["id"]), 36)
+        self.assertEqual(opt_put, {
+            "id": opt_put["id"],
+            "address_type": "facebook",
+            "address": "trevor_fb"
+        })
+
+        opt_out_del = store.delete("facebook", "trevor_fb")
+        self.assertEqual(opt_out_del, {
+            "id": opt_put["id"],
+            "address_type": "facebook",
+            "address": "trevor_fb"
+        })
+
+    def test_count(self):
+        store = OptOutMemory()
+        opt_count = store.count()
+        self.assertEqual(opt_count, 0)

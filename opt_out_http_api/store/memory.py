@@ -24,7 +24,8 @@ class OptOutMemory(object):
         self._store = {}
 
     def get(self, address_type, address):
-        return self._store.get((address_type, address))
+        key = (address_type, address)
+        return self._store.get(key)
 
     def put(self, address_type, address):
         key = (address_type, address)
@@ -37,7 +38,8 @@ class OptOutMemory(object):
         return self._store.get(key)
 
     def delete(self, address_type, address):
-        return self._store.remove((address_type, address))
+        key = (address_type, address)
+        return self._store.pop(key, None)
 
     def count(self):
         return len(self._store)
