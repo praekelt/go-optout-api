@@ -29,6 +29,8 @@ class TestMemory(TestCase):
             "address_type": "twitter_handle",
             "address": "@trevor"
         })
+        opt3 = store.get("mxit", "praekelt_mxit")
+        self.assertEqual(None, opt3)
 
     def test_delete_missing(self):
         store = OptOutMemory()
@@ -52,7 +54,21 @@ class TestMemory(TestCase):
             "address": "trevor_fb"
         })
 
+        opt_out_get = store.get("facebook", "trevor_fb")
+        self.assertEqual(opt_out_get, None)
+
     def test_count(self):
         store = OptOutMemory()
         opt_count = store.count()
         self.assertEqual(opt_count, 0)
+
+        opt_put = store.put("wechat", "vumi")
+        self.assertEqual(len(opt_put["id"]), 36)
+        self.assertEqual(opt_put, {
+            "id": opt_put["id"],
+            "address_type": "wechat",
+            "address": "vumi"
+        })
+
+        opt_count2 = store.count()
+        self.assertEqual(opt_count2, 1)
