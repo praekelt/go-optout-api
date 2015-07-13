@@ -1,5 +1,5 @@
 """
-Tests for IOptOutStore.
+Tests for OptOutMemory.
 """
 from zope.interface.verify import verifyClass, verifyObject
 from opt_out_http_api.store.interface import IOptOutStore
