@@ -60,7 +60,24 @@ class TestMemory(TestCase):
         opt_out_get = store.get("facebook", "trevor_fb")
         self.assertEqual(opt_out_get, None)
 
-    def test_count(self):
+    def test_count_zero(self):
         store = OptOutMemory()
+        opt_count_zero = store.count()
+        self.assertEqual(opt_count_zero, 0)
+
+    def test_count_one(self):
+        store = OptOutMemory()
+        opt_count_one = store.count()
+        self.assertEqual(opt_count_one, 0)
+        store.put("FB", "fb_PRP")
+        opt_count_one = store.count()
+        self.assertEqual(opt_count_one, 1)
+
+    def test_count_many(self):
+        store = OptOutMemory()
+        opt_count_one_many = store.count()
+        self.assertEqual(opt_count_one_many, 0)
+        store.put("facebook", "trevor_fb")
+        store.put("mxit", "trevor_mxit")
         opt_count = store.count()
-        self.assertEqual(opt_count, +opt_count)
+        self.assertEqual(opt_count, 2)
