@@ -29,6 +29,9 @@ class TestMemory(TestCase):
             "address_type": "twitter_handle",
             "address": "@trevor"
         })
+
+    def test_get_missing(self):
+        store = OptOutMemory()
         opt3 = store.get("mxit", "praekelt_mxit")
         self.assertEqual(None, opt3)
 
