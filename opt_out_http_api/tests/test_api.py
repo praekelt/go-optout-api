@@ -108,7 +108,7 @@ class TestApi(TestCase):
 
     @inlineCallbacks
     def test_opt_out_deleted(self):
-        resp = yield self.api_delete("/optouts/twitter/@twitter_handle")
+        resp = yield self.api_delete("/optouts/whatsup/@whatsup")
         self.assertEqual(resp.code, 200)
         data = yield resp.json()
         self.assertEqual(data, {
@@ -117,9 +117,9 @@ class TestApi(TestCase):
                 "reason": "OK",
             },
             "opt_out": {
-                "id": "5678",
-                "address_type": "linkedin",
-                "address": "@twitter_handle"
+                "id": "2684",
+                "address_type": "whatsup",
+                "address": "@whatsup"
             },
         })
 
@@ -141,7 +141,7 @@ class TestApi(TestCase):
         self.assertEqual(resp.code, 200)
         data = yield resp.json()
         self.assertEqual(data, {
-            "opt_out_count": 0,
+            "opt_out_count": 2,
             "status": {
                 "code": 200,
                 "reason": "OK"
@@ -155,7 +155,7 @@ class TestApi(TestCase):
         self.assertEqual(resp.code, 200)
         data = yield resp.json()
         self.assertEqual(data, {
-            "opt_out_count": 1,
+            "opt_out_count": 3,
             "status": {
                 "code": 200,
                 "reason": "OK"
