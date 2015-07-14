@@ -1,5 +1,4 @@
 import json
-import uuid
 
 from klein import Klein
 
@@ -19,46 +18,26 @@ class OptOutNotDeleted(Exception):
 class API(object):
     app = Klein()
 
-    def __init__(self):
-        self._optouts = [
-            {"id": "2468", "address_type": "msisdn", "address": "+273121100"},
-            {"id": "5678", "address_type": "twitter",
-             "address": "@twitter_handle"}
-        ]
+    def __init__(self, backend_class):
+        self._backend = backend_class()
 
 # Get Opt Out Address
 
     def get_opt_out(self, addresstype, address):
-        opt_outs = [
-            o for o in self._optouts
-            if o["address_type"] == addresstype and o["address"] == address
-        ]
-        if opt_outs:
-            return opt_outs[0]
-        return None
+        return self._backend.get(addresstype, address)
 
 # Save Opt Out Address
 
     def save_opt_out(self, addresstype, address):
-        opt_id = str(uuid.uuid4())
-        opt_out = {
-            "id": opt_id,
-            "address_type": addresstype,
-            "address": address,
-        }
-        self._optouts.append(opt_out)
-        return opt_out
+        return self._backend.put(addresstype, address)
 
 # Delete Opt Out Address
 
     def delete_opt_out(self, addresstype, address):
-        opt_out = self.get_opt_out(addresstype, address)
-        if opt_out is not None:
-            self._optouts.remove(opt_out)
-        return opt_out
+        return self._backend.delete(addresstype, address)
 
     def count_opt_outs(self):
-        return len(self._optouts)
+        return self._backend.count()
 
     def response(self, request, status_code=200, status_reason="OK", **data):
         request.setResponseCode(status_code)

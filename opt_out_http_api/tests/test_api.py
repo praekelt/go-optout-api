@@ -5,6 +5,7 @@ from twisted.trial.unittest import TestCase
 from twisted.web.server import Site
 from twisted.internet import reactor
 from twisted.internet.defer import inlineCallbacks
+from opt_out_http_api.store.memory import OptOutMemory
 
 
 class TestApi(TestCase):
@@ -18,7 +19,7 @@ class TestApi(TestCase):
 
     @inlineCallbacks
     def start_server(self):
-        self.app = API()
+        self.app = API(backend_class=OptOutMemory)
         self.server = yield reactor.listenTCP(0, Site(self.app.app.resource()))
         addr = self.server.getHost()
         self.url = "http://%s:%s" % (addr.host, addr.port)
@@ -117,7 +118,7 @@ class TestApi(TestCase):
             },
             "opt_out": {
                 "id": "5678",
-                "address_type": "twitter",
+                "address_type": "linkedin",
                 "address": "@twitter_handle"
             },
         })
@@ -140,7 +141,7 @@ class TestApi(TestCase):
         self.assertEqual(resp.code, 200)
         data = yield resp.json()
         self.assertEqual(data, {
-            "opt_out_count": 2,
+            "opt_out_count": 0,
             "status": {
                 "code": 200,
                 "reason": "OK"
@@ -154,7 +155,7 @@ class TestApi(TestCase):
         self.assertEqual(resp.code, 200)
         data = yield resp.json()
         self.assertEqual(data, {
-            "opt_out_count": 3,
+            "opt_out_count": 1,
             "status": {
                 "code": 200,
                 "reason": "OK"
