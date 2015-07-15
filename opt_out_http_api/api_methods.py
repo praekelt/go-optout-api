@@ -21,24 +21,6 @@ class API(object):
     def __init__(self, backend_class):
         self._backend = backend_class()
 
-# Get Opt Out Address
-
-    def get_opt_out(self, addresstype, address):
-        return self._backend.get(addresstype, address)
-
-# Save Opt Out Address
-
-    def save_opt_out(self, addresstype, address):
-        return self._backend.put(addresstype, address)
-
-# Delete Opt Out Address
-
-    def delete_opt_out(self, addresstype, address):
-        return self._backend.delete(addresstype, address)
-
-    def count_opt_outs(self):
-        return self._backend.count()
-
     def response(self, request, status_code=200, status_reason="OK", **data):
         request.setResponseCode(status_code)
         request.setHeader('Content-Type', 'application/json')
@@ -78,7 +60,7 @@ class API(object):
     @app.route('/optouts/<string:addresstype>/<string:address>',
                methods=['GET'])
     def get_address(self, request, addresstype, address):
-        opt_out = self.get_opt_out(addresstype, address)
+        opt_out = self._backend.get(addresstype, address)
         if opt_out is None:
             raise OptOutNotFound()
         return self.response(request, opt_out=opt_out)
@@ -86,21 +68,21 @@ class API(object):
     @app.route('/optouts/<string:addresstype>/<string:address>',
                methods=['PUT'])
     def save_address(self, request, addresstype, address):
-        opt_out = self.get_opt_out(addresstype, address)
+        opt_out = self._backend.get(addresstype, address)
         if opt_out is not None:
             raise OptOutAlreadyExists()
-        opt_out = self.save_opt_out(addresstype, address)
+        opt_out = self._backend.put(addresstype, address)
         return self.response(request, opt_out=opt_out)
 
     @app.route('/optouts/<string:addresstype>/<string:address>',
                methods=['DELETE'])
     def delete_address(self, request, addresstype, address):
-        opt_out = self.delete_opt_out(addresstype, address)
+        opt_out = self._backend.delete(addresstype, address)
         if opt_out is None:
             raise OptOutNotDeleted()
         return self.response(request, opt_out=opt_out)
 
     @app.route('/optouts/count', methods=['GET'])
     def get_opt_out_count(self, request):
-        count = self.count_opt_outs()
+        count = self._backend.count()
         return self.response(request, opt_out_count=count)

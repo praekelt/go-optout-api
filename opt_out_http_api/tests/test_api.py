@@ -40,13 +40,29 @@ class TestApi(TestCase):
     def api_count(self, path):
         return treq.get("%s%s" % (self.url, path), persistent=False)
 
-    def add_opt_out(self, address_type, address):
-        self.app.save_opt_out(address_type, address)
 
 # Tests
 
     @inlineCallbacks
     def test_opt_out_found(self):
+        def fixed_uuid():
+            return '36'
+        self.patch(uuid, 'uuid4', fixed_uuid)
+        resp = yield self.api_put("/optouts/msisdn/+273121100")
+        self.assertEqual(resp.code, 200)
+        data = yield resp.json()
+        self.assertEqual(data, {
+            "status": {
+                "code": 200,
+                "reason": "OK",
+            },
+            "opt_out": {
+                "id": "36",
+                "address_type": "msisdn",
+                "address": "+273121100"
+            },
+        })
+
         resp = yield self.api_call("/optouts/msisdn/+273121100")
         self.assertEqual(resp.code, 200)
         data = yield resp.json()
@@ -56,7 +72,7 @@ class TestApi(TestCase):
                 "reason": "OK",
             },
             "opt_out": {
-                "id": "2468",
+                "id": "36",
                 "address_type": "msisdn",
                 "address": "+273121100",
             },
@@ -96,6 +112,23 @@ class TestApi(TestCase):
 
     @inlineCallbacks
     def test_opt_out_conflict(self):
+        def fixed_uuid():
+            return '36'
+        self.patch(uuid, 'uuid4', fixed_uuid)
+        resp = yield self.api_put("/optouts/msisdn/+273121100")
+        self.assertEqual(resp.code, 200)
+        data = yield resp.json()
+        self.assertEqual(data, {
+            "status": {
+                "code": 200,
+                "reason": "OK",
+            },
+            "opt_out": {
+                "id": "36",
+                "address_type": "msisdn",
+                "address": "+273121100"
+            },
+        })
         response = yield self.api_put("/optouts/msisdn/+273121100")
         self.assertEqual(response.code, 409)
         data = yield response.json()
@@ -108,6 +141,23 @@ class TestApi(TestCase):
 
     @inlineCallbacks
     def test_opt_out_deleted(self):
+        def fixed_uuid():
+            return '2684'
+        self.patch(uuid, 'uuid4', fixed_uuid)
+        resp = yield self.api_put("/optouts/whatsup/@whatsup")
+        self.assertEqual(resp.code, 200)
+        data = yield resp.json()
+        self.assertEqual(data, {
+            "status": {
+                "code": 200,
+                "reason": "OK",
+            },
+            "opt_out": {
+                "id": "2684",
+                "address_type": "whatsup",
+                "address": "@whatsup"
+            },
+        })
         resp = yield self.api_delete("/optouts/whatsup/@whatsup")
         self.assertEqual(resp.code, 200)
         data = yield resp.json()
@@ -141,7 +191,7 @@ class TestApi(TestCase):
         self.assertEqual(resp.code, 200)
         data = yield resp.json()
         self.assertEqual(data, {
-            "opt_out_count": 2,
+            "opt_out_count": 0,
             "status": {
                 "code": 200,
                 "reason": "OK"
@@ -150,12 +200,29 @@ class TestApi(TestCase):
 
     @inlineCallbacks
     def test_opt_out_count_three_opt_outs(self):
-        self.add_opt_out("msisdn", "+271345")
+        def fixed_uuid():
+            return '1010'
+        self.patch(uuid, 'uuid4', fixed_uuid)
+        resp = yield self.api_put("/optouts/msisdn/+271345")
+        self.assertEqual(resp.code, 200)
+        data = yield resp.json()
+        self.assertEqual(data, {
+            "status": {
+                "code": 200,
+                "reason": "OK",
+            },
+            "opt_out": {
+                "id": "1010",
+                "address_type": "msisdn",
+                "address": "+271345"
+            },
+        })
+
         resp = yield self.api_count("/optouts/count")
         self.assertEqual(resp.code, 200)
         data = yield resp.json()
         self.assertEqual(data, {
-            "opt_out_count": 3,
+            "opt_out_count": 1,
             "status": {
                 "code": 200,
                 "reason": "OK"
