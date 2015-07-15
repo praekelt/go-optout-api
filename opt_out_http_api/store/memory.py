@@ -22,18 +22,7 @@ class OptOutMemory(object):
     def __init__(self):
         # _store maps (address_type, address) pairs to opt outs
         self._store = {}
-        """  ("msisdn", "+273121100"): {
-                "id": "2468",
-                "address_type": "msisdn",
-                "address": "+273121100",
-            },
-            ("whatsup", "@whatsup"): {
-                "id": "2684",
-                "address_type": "whatsup",
-                "address": "@whatsup",
-            },
-        }
-        """
+
     def get(self, address_type, address):
         key = (address_type, address)
         return self._store.get(key)
