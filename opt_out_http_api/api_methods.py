@@ -1,5 +1,4 @@
 import json
-import uuid
 
 from klein import Klein
 
@@ -19,46 +18,8 @@ class OptOutNotDeleted(Exception):
 class API(object):
     app = Klein()
 
-    def __init__(self):
-        self._optouts = [
-            {"id": "2468", "address_type": "msisdn", "address": "+273121100"},
-            {"id": "5678", "address_type": "twitter",
-             "address": "@twitter_handle"}
-        ]
-
-# Get Opt Out Address
-
-    def get_opt_out(self, addresstype, address):
-        opt_outs = [
-            o for o in self._optouts
-            if o["address_type"] == addresstype and o["address"] == address
-        ]
-        if opt_outs:
-            return opt_outs[0]
-        return None
-
-# Save Opt Out Address
-
-    def save_opt_out(self, addresstype, address):
-        opt_id = str(uuid.uuid4())
-        opt_out = {
-            "id": opt_id,
-            "address_type": addresstype,
-            "address": address,
-        }
-        self._optouts.append(opt_out)
-        return opt_out
-
-# Delete Opt Out Address
-
-    def delete_opt_out(self, addresstype, address):
-        opt_out = self.get_opt_out(addresstype, address)
-        if opt_out is not None:
-            self._optouts.remove(opt_out)
-        return opt_out
-
-    def count_opt_outs(self):
-        return len(self._optouts)
+    def __init__(self, backend):
+        self._backend = backend
 
     def response(self, request, status_code=200, status_reason="OK", **data):
         request.setResponseCode(status_code)
@@ -99,7 +60,7 @@ class API(object):
     @app.route('/optouts/<string:addresstype>/<string:address>',
                methods=['GET'])
     def get_address(self, request, addresstype, address):
-        opt_out = self.get_opt_out(addresstype, address)
+        opt_out = self._backend.get(addresstype, address)
         if opt_out is None:
             raise OptOutNotFound()
         return self.response(request, opt_out=opt_out)
@@ -107,21 +68,21 @@ class API(object):
     @app.route('/optouts/<string:addresstype>/<string:address>',
                methods=['PUT'])
     def save_address(self, request, addresstype, address):
-        opt_out = self.get_opt_out(addresstype, address)
+        opt_out = self._backend.get(addresstype, address)
         if opt_out is not None:
             raise OptOutAlreadyExists()
-        opt_out = self.save_opt_out(addresstype, address)
+        opt_out = self._backend.put(addresstype, address)
         return self.response(request, opt_out=opt_out)
 
     @app.route('/optouts/<string:addresstype>/<string:address>',
                methods=['DELETE'])
     def delete_address(self, request, addresstype, address):
-        opt_out = self.delete_opt_out(addresstype, address)
+        opt_out = self._backend.delete(addresstype, address)
         if opt_out is None:
             raise OptOutNotDeleted()
         return self.response(request, opt_out=opt_out)
 
     @app.route('/optouts/count', methods=['GET'])
     def get_opt_out_count(self, request):
-        count = self.count_opt_outs()
+        count = self._backend.count()
         return self.response(request, opt_out_count=count)

@@ -1,10 +1,10 @@
 from opt_out_http_api.api_methods import API
 import treq
-import uuid
 from twisted.trial.unittest import TestCase
 from twisted.web.server import Site
 from twisted.internet import reactor
 from twisted.internet.defer import inlineCallbacks
+from opt_out_http_api.store.memory import OptOutMemory
 
 
 class TestApi(TestCase):
@@ -18,7 +18,8 @@ class TestApi(TestCase):
 
     @inlineCallbacks
     def start_server(self):
-        self.app = API()
+        self.backend = OptOutMemory()
+        self.app = API(self.backend)
         self.server = yield reactor.listenTCP(0, Site(self.app.app.resource()))
         addr = self.server.getHost()
         self.url = "http://%s:%s" % (addr.host, addr.port)
@@ -39,13 +40,12 @@ class TestApi(TestCase):
     def api_count(self, path):
         return treq.get("%s%s" % (self.url, path), persistent=False)
 
-    def add_opt_out(self, address_type, address):
-        self.app.save_opt_out(address_type, address)
 
 # Tests
 
     @inlineCallbacks
     def test_opt_out_found(self):
+        existing_opt_out = self.backend.put("msisdn", "+273121100")
         resp = yield self.api_call("/optouts/msisdn/+273121100")
         self.assertEqual(resp.code, 200)
         data = yield resp.json()
@@ -55,7 +55,7 @@ class TestApi(TestCase):
                 "reason": "OK",
             },
             "opt_out": {
-                "id": "2468",
+                "id": existing_opt_out["id"],
                 "address_type": "msisdn",
                 "address": "+273121100",
             },
@@ -75,10 +75,8 @@ class TestApi(TestCase):
 
     @inlineCallbacks
     def test_opt_out_created(self):
-        def fixed_uuid():
-            return '1234'
-        self.patch(uuid, 'uuid4', fixed_uuid)
-        resp = yield self.api_put("/optouts/linkedin/+1029384756")
+        resp = yield self.api_put("/optouts/msisdn/+273121100")
+        created_opt_out = self.backend.get("msisdn", "+273121100")
         self.assertEqual(resp.code, 200)
         data = yield resp.json()
         self.assertEqual(data, {
@@ -87,14 +85,15 @@ class TestApi(TestCase):
                 "reason": "OK",
             },
             "opt_out": {
-                "id": "1234",
-                "address_type": "linkedin",
-                "address": "+1029384756"
+                "id": created_opt_out["id"],
+                "address_type": "msisdn",
+                "address": "+273121100"
             },
         })
 
     @inlineCallbacks
     def test_opt_out_conflict(self):
+        self.backend.put("msisdn", "+273121100")
         response = yield self.api_put("/optouts/msisdn/+273121100")
         self.assertEqual(response.code, 409)
         data = yield response.json()
@@ -107,7 +106,8 @@ class TestApi(TestCase):
 
     @inlineCallbacks
     def test_opt_out_deleted(self):
-        resp = yield self.api_delete("/optouts/twitter/@twitter_handle")
+        delete_opt_out = self.backend.put("whatsapp", "@whatsup")
+        resp = yield self.api_delete("/optouts/whatsapp/@whatsup")
         self.assertEqual(resp.code, 200)
         data = yield resp.json()
         self.assertEqual(data, {
@@ -116,9 +116,9 @@ class TestApi(TestCase):
                 "reason": "OK",
             },
             "opt_out": {
-                "id": "5678",
-                "address_type": "twitter",
-                "address": "@twitter_handle"
+                "id": delete_opt_out["id"],
+                "address_type": "whatsapp",
+                "address": "@whatsup"
             },
         })
 
@@ -135,7 +135,22 @@ class TestApi(TestCase):
         })
 
     @inlineCallbacks
+    def test_opt_out_count_zero_opt_out(self):
+        resp = yield self.api_count("/optouts/count")
+        self.assertEqual(resp.code, 200)
+        data = yield resp.json()
+        self.assertEqual(data, {
+            "opt_out_count": 0,
+            "status": {
+                "code": 200,
+                "reason": "OK"
+            },
+        })
+
+    @inlineCallbacks
     def test_opt_out_count_two_opt_outs(self):
+        self.backend.put("slack", "@slack")
+        self.backend.put("twitter_handle", "@trevor_october")
         resp = yield self.api_count("/optouts/count")
         self.assertEqual(resp.code, 200)
         data = yield resp.json()
@@ -149,7 +164,9 @@ class TestApi(TestCase):
 
     @inlineCallbacks
     def test_opt_out_count_three_opt_outs(self):
-        self.add_opt_out("msisdn", "+271345")
+        self.backend.put("whatsapp", "+27782635432")
+        self.backend.put("mxit", "@trevor_mxit")
+        self.backend.put("facebook", "fb")
         resp = yield self.api_count("/optouts/count")
         self.assertEqual(resp.code, 200)
         data = yield resp.json()
