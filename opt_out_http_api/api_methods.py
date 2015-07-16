@@ -18,8 +18,8 @@ class OptOutNotDeleted(Exception):
 class API(object):
     app = Klein()
 
-    def __init__(self, backend_class):
-        self._backend = backend_class
+    def __init__(self, backend):
+        self._backend = backend
 
     def response(self, request, status_code=200, status_reason="OK", **data):
         request.setResponseCode(status_code)

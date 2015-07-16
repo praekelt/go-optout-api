@@ -75,8 +75,8 @@ class TestMemory(TestCase):
 
     def test_count_many(self):
         store = OptOutMemory()
-        opt_count_many = store.count()
-        self.assertEqual(opt_count_many, 0)
+        opt_count = store.count()
+        self.assertEqual(opt_count, 0)
         store.put("facebook", "trevor_fb")
         store.put("mxit", "trevor_mxit")
         opt_count = store.count()
