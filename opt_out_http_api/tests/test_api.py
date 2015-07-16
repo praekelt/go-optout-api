@@ -75,8 +75,8 @@ class TestApi(TestCase):
 
     @inlineCallbacks
     def test_opt_out_created(self):
-        create_opt_out = self.backend.put("msisdn", "+273121100")
-        resp = yield self.api_call("/optouts/msisdn/+273121100")
+        resp = yield self.api_put("/optouts/msisdn/+273121100")
+        created_opt_out = self.backend.get("msisdn", "+273121100")
         self.assertEqual(resp.code, 200)
         data = yield resp.json()
         self.assertEqual(data, {
@@ -85,7 +85,7 @@ class TestApi(TestCase):
                 "reason": "OK",
             },
             "opt_out": {
-                "id": create_opt_out["id"],
+                "id": created_opt_out["id"],
                 "address_type": "msisdn",
                 "address": "+273121100"
             },
@@ -135,7 +135,7 @@ class TestApi(TestCase):
         })
 
     @inlineCallbacks
-    def test_opt_out_count_zore_opt_out(self):
+    def test_opt_out_count_zero_opt_out(self):
         resp = yield self.api_count("/optouts/count")
         self.assertEqual(resp.code, 200)
         data = yield resp.json()
