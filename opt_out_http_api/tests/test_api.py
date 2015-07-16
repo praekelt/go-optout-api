@@ -19,7 +19,8 @@ class TestApi(TestCase):
 
     @inlineCallbacks
     def start_server(self):
-        self.app = API(backend_class=OptOutMemory)
+        self.backend = OptOutMemory()
+        self.app = API(self.backend)
         self.server = yield reactor.listenTCP(0, Site(self.app.app.resource()))
         addr = self.server.getHost()
         self.url = "http://%s:%s" % (addr.host, addr.port)
