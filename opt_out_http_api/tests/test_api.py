@@ -1,6 +1,5 @@
 from opt_out_http_api.api_methods import API
 import treq
-import uuid
 from twisted.trial.unittest import TestCase
 from twisted.web.server import Site
 from twisted.internet import reactor
@@ -46,26 +45,7 @@ class TestApi(TestCase):
 
     @inlineCallbacks
     def test_opt_out_found(self):
-        def fixed_uuid():
-            return '36'
-        self.patch(uuid, 'uuid4', fixed_uuid)
         existing_opt_out = self.backend.put("msisdn", "+273121100")
-        resp = yield self.api_call("/optouts/msisdn/+273121100")
-        self.assertEqual(resp.code, 200)
-        data = yield resp.json()
-        self.assertEqual(data, {
-            "status": {
-                "code": 200,
-                "reason": "OK",
-            },
-            "opt_out": {
-                "id": existing_opt_out["id"],
-                "address_type": "msisdn",
-                "address": "+273121100"
-            },
-        })
-
-        existing_opt_out = self.backend.get("msisdn", "+273121100")
         resp = yield self.api_call("/optouts/msisdn/+273121100")
         self.assertEqual(resp.code, 200)
         data = yield resp.json()
@@ -83,7 +63,6 @@ class TestApi(TestCase):
 
     @inlineCallbacks
     def test_opt_out_not_found(self):
-        self.backend.get("mxit", "+369963")
         resp = yield self.api_call("/optouts/mxit/+369963")
         self.assertEqual(resp.code, 404)
         data = yield resp.json()
@@ -96,9 +75,6 @@ class TestApi(TestCase):
 
     @inlineCallbacks
     def test_opt_out_created(self):
-        def fixed_uuid():
-            return '36'
-        self.patch(uuid, 'uuid4', fixed_uuid)
         create_opt_out = self.backend.put("msisdn", "+273121100")
         resp = yield self.api_call("/optouts/msisdn/+273121100")
         self.assertEqual(resp.code, 200)
@@ -117,25 +93,7 @@ class TestApi(TestCase):
 
     @inlineCallbacks
     def test_opt_out_conflict(self):
-        def fixed_uuid():
-            return '36'
-        self.patch(uuid, 'uuid4', fixed_uuid)
-        existing_opt_out = self.backend.put("msisdn", "+273121100")
-        resp = yield self.api_call("/optouts/msisdn/+273121100")
-        self.assertEqual(resp.code, 200)
-        data = yield resp.json()
-        self.assertEqual(data, {
-            "status": {
-                "code": 200,
-                "reason": "OK",
-            },
-            "opt_out": {
-                "id": existing_opt_out["id"],
-                "address_type": "msisdn",
-                "address": "+273121100"
-            },
-        })
-        existing_opt_out = self.backend.put("msisdn", "+273121100")
+        self.backend.put("msisdn", "+273121100")
         response = yield self.api_put("/optouts/msisdn/+273121100")
         self.assertEqual(response.code, 409)
         data = yield response.json()
@@ -148,25 +106,7 @@ class TestApi(TestCase):
 
     @inlineCallbacks
     def test_opt_out_deleted(self):
-        def fixed_uuid():
-            return '36'
-        self.patch(uuid, 'uuid4', fixed_uuid)
         delete_opt_out = self.backend.put("whatsapp", "@whatsup")
-        resp = yield self.api_call("/optouts/whatsapp/@whatsup")
-        self.assertEqual(resp.code, 200)
-        data = yield resp.json()
-        self.assertEqual(data, {
-            "status": {
-                "code": 200,
-                "reason": "OK",
-            },
-            "opt_out": {
-                "id": delete_opt_out["id"],
-                "address_type": "whatsapp",
-                "address": "@whatsup"
-            },
-        })
-        delete_opt_out = self.backend.get("whatsapp", "@whatsup")
         resp = yield self.api_delete("/optouts/whatsapp/@whatsup")
         self.assertEqual(resp.code, 200)
         data = yield resp.json()
@@ -184,7 +124,6 @@ class TestApi(TestCase):
 
     @inlineCallbacks
     def test_opt_out_nothing_to_delete(self):
-        self.backend.delete("whatsapp", "+2716230199")
         response = yield self.api_delete("/optouts/whatsapp/+2716230199")
         self.assertEqual(response.code, 404)
         data = yield response.json()
@@ -196,8 +135,7 @@ class TestApi(TestCase):
         })
 
     @inlineCallbacks
-    def test_opt_out_count_two_opt_outs(self):
-        self.backend.count()
+    def test_opt_out_count_zore_opt_out(self):
         resp = yield self.api_count("/optouts/count")
         self.assertEqual(resp.code, 200)
         data = yield resp.json()
@@ -210,32 +148,30 @@ class TestApi(TestCase):
         })
 
     @inlineCallbacks
-    def test_opt_out_count_three_opt_outs(self):
-        def fixed_uuid():
-            return '1450'
-        self.patch(uuid, 'uuid4', fixed_uuid)
-        count_opt_out = self.backend.put("twitter_handle", "@twitter")
-        resp = yield self.api_call("/optouts/twitter_handle/@twitter")
-        self.assertEqual(resp.code, 200)
-        data = yield resp.json()
-        self.assertEqual(data, {
-            "status": {
-                "code": 200,
-                "reason": "OK",
-            },
-            "opt_out": {
-                "id": count_opt_out["id"],
-                "address_type": "twitter_handle",
-                "address": "@twitter"
-            },
-        })
-
-        count_opt_out = self.backend.count()
+    def test_opt_out_count_two_opt_outs(self):
+        self.backend.put("slack", "@slack")
+        self.backend.put("twitter_handle", "@trevor_october")
         resp = yield self.api_count("/optouts/count")
         self.assertEqual(resp.code, 200)
         data = yield resp.json()
         self.assertEqual(data, {
-            "opt_out_count": 1,
+            "opt_out_count": 2,
+            "status": {
+                "code": 200,
+                "reason": "OK"
+            },
+        })
+
+    @inlineCallbacks
+    def test_opt_out_count_three_opt_outs(self):
+        self.backend.put("whatsapp", "+27782635432")
+        self.backend.put("mxit", "@trevor_mxit")
+        self.backend.put("facebook", "fb")
+        resp = yield self.api_count("/optouts/count")
+        self.assertEqual(resp.code, 200)
+        data = yield resp.json()
+        self.assertEqual(data, {
+            "opt_out_count": 3,
             "status": {
                 "code": 200,
                 "reason": "OK"
