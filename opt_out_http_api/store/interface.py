@@ -1,6 +1,15 @@
 import zope.interface
 
 
+class IOptOutBackend(zope.interface.Interface):
+    def get_opt_out_collection(owner_id):
+        """ Return the opt out collection for the specified owner.
+
+        :param str owner_id:
+            The id of the owner of the opt out store.
+        """
+
+
 class IOptOutCollection(zope.interface.Interface):
 
         def get(address_type, address):

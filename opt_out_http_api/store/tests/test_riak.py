@@ -8,7 +8,8 @@ from vumi.tests.helpers import PersistenceHelper
 
 from go.vumitools.opt_out.models import OptOutStore
 
-from opt_out_http_api.store.interface import IOptOutCollection
+from opt_out_http_api.store.interface import (
+    IOptOutBackend, IOptOutCollection)
 from opt_out_http_api.store.riak import (
     RiakOptOutBackend, RiakOptOutCollection)
 
@@ -23,6 +24,14 @@ class TestRiakOptOutBackend(VumiTestCase):
         manager = yield self.persistence_helper.get_riak_manager()
         backend = RiakOptOutBackend(manager)
         returnValue(backend)
+
+    def test_class_iface(self):
+        self.assertTrue(verifyClass(IOptOutBackend, RiakOptOutBackend))
+
+    @inlineCallbacks
+    def test_instance_iface(self):
+        backend = yield self.mk_backend()
+        self.assertTrue(verifyObject(IOptOutBackend, backend))
 
     @inlineCallbacks
     def test_get_opt_out_collection(self):

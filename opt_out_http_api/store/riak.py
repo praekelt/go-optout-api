@@ -5,7 +5,7 @@ from zope.interface import implements
 
 from go.vumitools.opt_out import OptOutStore, OptOut
 
-from .interface import IOptOutCollection
+from .interface import IOptOutBackend, IOptOutCollection
 
 
 class RiakOptOutBackend(object):
@@ -17,8 +17,7 @@ class RiakOptOutBackend(object):
         A Riak manager for the opt out stores.
     """
 
-    # TODO: this should declare that it implements the
-    #       opt out backend interface
+    implements(IOptOutBackend)
 
     def __init__(self, riak_manager):
         self.riak_manager = riak_manager
