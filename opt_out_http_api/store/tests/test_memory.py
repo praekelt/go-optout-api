@@ -1,21 +1,22 @@
 """
-Tests for OptOutMemory.
+Tests for opt_out_http_api.store.memory.
 """
 from zope.interface.verify import verifyClass, verifyObject
-from opt_out_http_api.store.interface import IOptOutStore
-from opt_out_http_api.store.memory import OptOutMemory
+from opt_out_http_api.store.interface import IOptOutCollection
+from opt_out_http_api.store.memory import MemoryOptOutCollection
 from twisted.trial.unittest import TestCase
 
 
 class TestMemory(TestCase):
     def test_setup_class_iface(self):
-        self.assertTrue(verifyClass(IOptOutStore, OptOutMemory))
+        self.assertTrue(verifyClass(IOptOutCollection, MemoryOptOutCollection))
 
     def test_setup_instance_iface(self):
-        self.assertTrue(verifyObject(IOptOutStore, OptOutMemory()))
+        collection = MemoryOptOutCollection()
+        self.assertTrue(verifyObject(IOptOutCollection, collection))
 
     def test_put_and_get(self):
-        store = OptOutMemory()
+        store = MemoryOptOutCollection()
         opt1 = store.put("twitter_handle", "@trevor")
         self.assertEqual(len(opt1["id"]), 36)  # length of uuid-4 string
         self.assertEqual(opt1, {
@@ -31,17 +32,17 @@ class TestMemory(TestCase):
         })
 
     def test_get_missing(self):
-        store = OptOutMemory()
+        store = MemoryOptOutCollection()
         opt3 = store.get("mxit", "praekelt_mxit")
         self.assertEqual(None, opt3)
 
     def test_delete_missing(self):
-        store = OptOutMemory()
+        store = MemoryOptOutCollection()
         opt_out_delete = store.delete("twitter_handle", "@trevor")
         self.assertEqual(None, opt_out_delete)
 
     def test_put_and_delete(self):
-        store = OptOutMemory()
+        store = MemoryOptOutCollection()
         opt_put = store.put("facebook", "trevor_fb")
         self.assertEqual(len(opt_put["id"]), 36)
         self.assertEqual(opt_put, {
@@ -61,12 +62,12 @@ class TestMemory(TestCase):
         self.assertEqual(opt_out_get, None)
 
     def test_count_zero(self):
-        store = OptOutMemory()
+        store = MemoryOptOutCollection()
         opt_count_zero = store.count()
         self.assertEqual(opt_count_zero, 0)
 
     def test_count_one(self):
-        store = OptOutMemory()
+        store = MemoryOptOutCollection()
         opt_count_one = store.count()
         self.assertEqual(opt_count_one, 0)
         store.put("FB", "fb_PRP")
@@ -74,7 +75,7 @@ class TestMemory(TestCase):
         self.assertEqual(opt_count_one, 1)
 
     def test_count_many(self):
-        store = OptOutMemory()
+        store = MemoryOptOutCollection()
         opt_count = store.count()
         self.assertEqual(opt_count, 0)
         store.put("facebook", "trevor_fb")

@@ -2,10 +2,10 @@ import uuid
 
 from zope.interface import implements
 
-from .interface import IOptOutStore
+from .interface import IOptOutCollection
 
 
-class OptOutMemory(object):
+class MemoryOptOutCollection(object):
     """
     This implements the IOptOutStore interface.
 
@@ -19,7 +19,7 @@ class OptOutMemory(object):
         }
     """
 
-    implements(IOptOutStore)
+    implements(IOptOutCollection)
 
     def __init__(self):
         # _store maps (address_type, address) pairs to opt outs

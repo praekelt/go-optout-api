@@ -1,7 +1,7 @@
 import zope.interface
 
 
-class IOptOutStore(zope.interface.Interface):
+class IOptOutCollection(zope.interface.Interface):
 
         def get(address_type, address):
             """ Retrieve the opt out for an address. """
