@@ -65,14 +65,14 @@ class RiakOptOutCollection(object):
             opt_out.get_data(), OptOut.field_descriptors.keys())
 
     @inlineCallbacks
-    def get_opt_out(self, addresstype, address):
+    def get(self, addresstype, address):
         opt_out = yield self.store.get_opt_out(addresstype, address)
         if opt_out is None:
             returnValue(None)
         returnValue(self._opt_out_to_dict(opt_out))
 
     @inlineCallbacks
-    def save_opt_out(self, addresstype, address):
+    def put(self, addresstype, address):
         opt_out = yield self.store.new_opt_out(
             addresstype, address, message={
                 'message_id': None,  # TODO: fix opt out store
@@ -80,9 +80,14 @@ class RiakOptOutCollection(object):
         returnValue(self._opt_out_to_dict(opt_out))
 
     @inlineCallbacks
-    def delete_opt_out(self, addresstype, address):
+    def delete(self, addresstype, address):
         opt_out = yield self.store.get_opt_out(addresstype, address)
         if opt_out is None:
             returnValue(None)
         yield opt_out.delete()
         returnValue(opt_out)
+
+    @inlineCallbacks
+    def count(self):
+        count = yield self.store.count()
+        returnValue(count)

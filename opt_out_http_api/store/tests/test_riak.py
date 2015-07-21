@@ -1,12 +1,14 @@
 """ Test for the Riak opt out backend. """
 
 from twisted.internet.defer import inlineCallbacks, returnValue
+from zope.interface.verify import verifyClass, verifyObject
 
 from vumi.tests.helpers import VumiTestCase
 from vumi.tests.helpers import PersistenceHelper
 
 from go.vumitools.opt_out.models import OptOutStore
 
+from opt_out_http_api.store.interface import IOptOutStore
 from opt_out_http_api.store.riak import (
     RiakOptOutBackend, RiakOptOutCollection)
 
@@ -42,12 +44,20 @@ class TestRiakOptOutCollection(VumiTestCase):
         collection = RiakOptOutCollection(store)
         returnValue((store, collection))
 
+    def test_class_iface(self):
+        self.assertTrue(verifyClass(IOptOutStore, RiakOptOutCollection))
+
+    @inlineCallbacks
+    def test_instance_iface(self):
+        _store, collection = yield self.mk_collection("owner-1")
+        self.assertTrue(verifyObject(IOptOutStore, collection))
+
     @inlineCallbacks
     def test_get_opt_out_exists(self):
         store, collection = yield self.mk_collection("owner-1")
         opt_out_1 = yield store.new_opt_out(
             "msisdn", "+12345", {"message_id": "FIXME"})
-        opt_out_2 = yield collection.get_opt_out("msisdn", "+12345")
+        opt_out_2 = yield collection.get("msisdn", "+12345")
         self.assertEqual(opt_out_2, {
             'created_at': opt_out_1.get_data().get('created_at'),
             'message': u'FIXME',
@@ -57,5 +67,5 @@ class TestRiakOptOutCollection(VumiTestCase):
     @inlineCallbacks
     def test_get_opt_out_absent(self):
         store, collection = yield self.mk_collection("owner-1")
-        opt_out = yield collection.get_opt_out("msisdn", "+12345")
+        opt_out = yield collection.get("msisdn", "+12345")
         self.assertEqual(opt_out, None)
