@@ -1,8 +1,11 @@
 """ Riak opt out backend. """
 
 from twisted.internet.defer import inlineCallbacks, returnValue
+from zope.interface import implements
 
 from go.vumitools.opt_out import OptOutStore, OptOut
+
+from .interface import IOptOutStore
 
 
 class RiakOptOutBackend(object):
@@ -39,8 +42,7 @@ class RiakOptOutCollection(object):
         The opt out store to provide access to.
     """
 
-    # TODO: this should declare that it implements the
-    #       opt out collection interface
+    implements(IOptOutStore)
 
     def __init__(self, opt_out_store):
         self.store = opt_out_store

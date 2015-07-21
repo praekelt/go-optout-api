@@ -1,6 +1,8 @@
-from zope.interface import implements
-from interface import IOptOutStore
 import uuid
+
+from zope.interface import implements
+
+from .interface import IOptOutStore
 
 
 class OptOutMemory(object):
