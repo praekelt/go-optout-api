@@ -2,12 +2,31 @@
 Tests for opt_out_http_api.store.memory.
 """
 from zope.interface.verify import verifyClass, verifyObject
-from opt_out_http_api.store.interface import IOptOutCollection
-from opt_out_http_api.store.memory import MemoryOptOutCollection
+from opt_out_http_api.store.interface import (
+    IOptOutBackend, IOptOutCollection)
+from opt_out_http_api.store.memory import (
+    MemoryOptOutBackend, MemoryOptOutCollection)
 from twisted.trial.unittest import TestCase
 
 
-class TestMemory(TestCase):
+class TestMemoryOptOutBackend(TestCase):
+    def mk_backend(self):
+        return MemoryOptOutBackend()
+
+    def test_class_iface(self):
+        self.assertTrue(verifyClass(IOptOutBackend, MemoryOptOutBackend))
+
+    def test_instance_iface(self):
+        backend = self.mk_backend()
+        self.assertTrue(verifyObject(IOptOutBackend, backend))
+
+    def test_get_opt_out_collection(self):
+        backend = self.mk_backend()
+        collection = backend.get_opt_out_collection("owner-1")
+        self.assertTrue(isinstance(collection, MemoryOptOutCollection))
+
+
+class TestMemoryOptOutCollection(TestCase):
     def test_setup_class_iface(self):
         self.assertTrue(verifyClass(IOptOutCollection, MemoryOptOutCollection))
 
