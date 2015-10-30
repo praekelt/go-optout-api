@@ -15,6 +15,7 @@ setup(
         'klein',
         'treq',
         'Twisted>=13.1.0',
+        'PyYAML',
         'vumi>=0.5.4',
         'vumi-go',
     ],
