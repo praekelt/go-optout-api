@@ -4,7 +4,7 @@ from twisted.trial.unittest import TestCase
 from twisted.web.server import Site
 from twisted.internet import reactor
 from twisted.internet.defer import inlineCallbacks
-from go_optouts.store.memory import MemoryOptOutCollection
+from go_optouts.store.memory import MemoryOptOutBackend
 
 
 class TestApi(TestCase):
@@ -18,7 +18,9 @@ class TestApi(TestCase):
 
     @inlineCallbacks
     def start_server(self):
-        self.backend = MemoryOptOutCollection()
+        self.owner_id = "owner-1"
+        self.backend = MemoryOptOutBackend()
+        self.collection = self.backend.get_opt_out_collection(self.owner_id)
         self.app = API(self.backend)
         self.server = yield reactor.listenTCP(0, Site(self.app.app.resource()))
         addr = self.server.getHost()
@@ -28,25 +30,28 @@ class TestApi(TestCase):
     def stop_server(self):
         yield self.server.loseConnection()
 
-    def api_call(self, path):
-        return treq.get("%s%s" % (self.url, path), persistent=False)
+    def _api_call(self, handler, path):
+        url = "%s%s" % (self.url, path)
+        headers = {
+            "X-Owner-ID": self.owner_id,
+        }
+        return handler(url, headers=headers, persistent=False)
+
+    def api_get(self, path):
+        return self._api_call(treq.get, path)
 
     def api_put(self, path):
-        return treq.put("%s%s" % (self.url, path), persistent=False)
+        return self._api_call(treq.put, path)
 
     def api_delete(self, path):
-        return treq.delete("%s%s" % (self.url, path), persistent=False)
-
-    def api_count(self, path):
-        return treq.get("%s%s" % (self.url, path), persistent=False)
-
+        return self._api_call(treq.delete, path)
 
 # Tests
 
     @inlineCallbacks
     def test_opt_out_found(self):
-        existing_opt_out = self.backend.put("msisdn", "+273121100")
-        resp = yield self.api_call("/optouts/msisdn/+273121100")
+        existing_opt_out = self.collection.put("msisdn", "+273121100")
+        resp = yield self.api_get("/optouts/msisdn/+273121100")
         self.assertEqual(resp.code, 200)
         data = yield resp.json()
         self.assertEqual(data, {
@@ -63,7 +68,7 @@ class TestApi(TestCase):
 
     @inlineCallbacks
     def test_opt_out_not_found(self):
-        resp = yield self.api_call("/optouts/mxit/+369963")
+        resp = yield self.api_get("/optouts/mxit/+369963")
         self.assertEqual(resp.code, 404)
         data = yield resp.json()
         self.assertEqual(data, {
@@ -76,7 +81,7 @@ class TestApi(TestCase):
     @inlineCallbacks
     def test_opt_out_created(self):
         resp = yield self.api_put("/optouts/msisdn/+273121100")
-        created_opt_out = self.backend.get("msisdn", "+273121100")
+        created_opt_out = self.collection.get("msisdn", "+273121100")
         self.assertEqual(resp.code, 200)
         data = yield resp.json()
         self.assertEqual(data, {
@@ -93,7 +98,7 @@ class TestApi(TestCase):
 
     @inlineCallbacks
     def test_opt_out_conflict(self):
-        self.backend.put("msisdn", "+273121100")
+        self.collection.put("msisdn", "+273121100")
         response = yield self.api_put("/optouts/msisdn/+273121100")
         self.assertEqual(response.code, 409)
         data = yield response.json()
@@ -106,7 +111,7 @@ class TestApi(TestCase):
 
     @inlineCallbacks
     def test_opt_out_deleted(self):
-        delete_opt_out = self.backend.put("whatsapp", "@whatsup")
+        delete_opt_out = self.collection.put("whatsapp", "@whatsup")
         resp = yield self.api_delete("/optouts/whatsapp/@whatsup")
         self.assertEqual(resp.code, 200)
         data = yield resp.json()
@@ -136,7 +141,7 @@ class TestApi(TestCase):
 
     @inlineCallbacks
     def test_opt_out_count_zero_opt_out(self):
-        resp = yield self.api_count("/optouts/count")
+        resp = yield self.api_get("/optouts/count")
         self.assertEqual(resp.code, 200)
         data = yield resp.json()
         self.assertEqual(data, {
@@ -149,9 +154,9 @@ class TestApi(TestCase):
 
     @inlineCallbacks
     def test_opt_out_count_two_opt_outs(self):
-        self.backend.put("slack", "@slack")
-        self.backend.put("twitter_handle", "@trevor_october")
-        resp = yield self.api_count("/optouts/count")
+        self.collection.put("slack", "@slack")
+        self.collection.put("twitter_handle", "@trevor_october")
+        resp = yield self.api_get("/optouts/count")
         self.assertEqual(resp.code, 200)
         data = yield resp.json()
         self.assertEqual(data, {
@@ -164,10 +169,10 @@ class TestApi(TestCase):
 
     @inlineCallbacks
     def test_opt_out_count_three_opt_outs(self):
-        self.backend.put("whatsapp", "+27782635432")
-        self.backend.put("mxit", "@trevor_mxit")
-        self.backend.put("facebook", "fb")
-        resp = yield self.api_count("/optouts/count")
+        self.collection.put("whatsapp", "+27782635432")
+        self.collection.put("mxit", "@trevor_mxit")
+        self.collection.put("facebook", "fb")
+        resp = yield self.api_get("/optouts/count")
         self.assertEqual(resp.code, 200)
         data = yield resp.json()
         self.assertEqual(data, {
