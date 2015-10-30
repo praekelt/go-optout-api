@@ -74,7 +74,10 @@ class RiakOptOutCollection(object):
     def put(self, addresstype, address):
         opt_out = yield self.store.new_opt_out(
             addresstype, address, message={
-                'message_id': None,  # TODO: fix opt out store
+                # TODO: Fix the Vumi Go opt out store to allow descriptions
+                #       of why an address was opted out. Currently the only
+                #       description allowed is a Vumi message id. :|
+                'message_id': None,
             })
         returnValue(self._opt_out_to_dict(opt_out))
 
