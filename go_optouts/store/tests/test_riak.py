@@ -112,3 +112,23 @@ class TestRiakOptOutCollection(VumiTestCase):
         store, collection = yield self.mk_collection("owner-1")
         opt_out_coll = yield collection.delete("msisdn", "+12345")
         self.assertEqual(opt_out_coll, None)
+
+    @inlineCallbacks
+    def test_count_zero(self):
+        _store, collection = yield self.mk_collection("owner-1")
+        self.assertEqual((yield collection.count()), 0)
+
+    @inlineCallbacks
+    def test_count_one(self):
+        store, collection = yield self.mk_collection("owner-1")
+        yield store.new_opt_out(
+            "msisdn", "+12345", {"message_id": "dummy-id"})
+        self.assertEqual((yield collection.count()), 1)
+
+    @inlineCallbacks
+    def test_count_many(self):
+        store, collection = yield self.mk_collection("owner-1")
+        for i in range(4):
+            yield store.new_opt_out(
+                "msisdn", "+1234%d" % i, {"message_id": "dummy-id"})
+        self.assertEqual((yield collection.count()), 4)
