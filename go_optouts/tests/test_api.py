@@ -1,4 +1,4 @@
-from go_optouts.api_methods import API
+from go_optouts.api import API
 import treq
 from twisted.trial.unittest import TestCase
 from twisted.web.server import Site

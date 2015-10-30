@@ -1,4 +1,4 @@
-from api_methods import API
+from api import API
 from store.memory import MemoryOptOutBackend
 
 site = API(MemoryOptOutBackend())
