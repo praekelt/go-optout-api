@@ -2,9 +2,9 @@
 Tests for opt_out_http_api.store.memory.
 """
 from zope.interface.verify import verifyClass, verifyObject
-from opt_out_http_api.store.interface import (
+from go_optouts.store.interface import (
     IOptOutBackend, IOptOutCollection)
-from opt_out_http_api.store.memory import (
+from go_optouts.store.memory import (
     MemoryOptOutBackend, MemoryOptOutCollection)
 from twisted.trial.unittest import TestCase
 
