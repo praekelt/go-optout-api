@@ -7,7 +7,7 @@ from vumi.tests.helpers import PersistenceHelper
 
 from go.vumitools.opt_out.models import OptOutStore
 
-from opt_out_http_api.backends.riak import (
+from go_optouts.backends.riak import (
     RiakOptOutBackend, RiakOptOutCollection)
 
 

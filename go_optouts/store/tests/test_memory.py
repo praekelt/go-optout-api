@@ -2,8 +2,8 @@
 Tests for OptOutMemory.
 """
 from zope.interface.verify import verifyClass, verifyObject
-from opt_out_http_api.store.interface import IOptOutStore
-from opt_out_http_api.store.memory import OptOutMemory
+from go_optouts.store.interface import IOptOutStore
+from go_optouts.store.memory import OptOutMemory
 from twisted.trial.unittest import TestCase
 
 

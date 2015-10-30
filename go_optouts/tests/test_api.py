@@ -1,10 +1,10 @@
-from opt_out_http_api.api_methods import API
+from go_optouts.api_methods import API
 import treq
 from twisted.trial.unittest import TestCase
 from twisted.web.server import Site
 from twisted.internet import reactor
 from twisted.internet.defer import inlineCallbacks
-from opt_out_http_api.store.memory import OptOutMemory
+from go_optouts.store.memory import OptOutMemory
 
 
 class TestApi(TestCase):

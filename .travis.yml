@@ -22,4 +22,4 @@ install:
   - riak version
   - riak-admin member-status
 script:
-  - trial opt_out_http_api
+  - trial go_optouts
