@@ -83,8 +83,9 @@ class RiakOptOutCollection(object):
         opt_out = yield self.store.get_opt_out(addresstype, address)
         if opt_out is None:
             returnValue(None)
+        opt_out_dict = self._opt_out_to_dict(opt_out)
         yield opt_out.delete()
-        returnValue(opt_out)
+        returnValue(opt_out_dict)
 
     @inlineCallbacks
     def count(self):

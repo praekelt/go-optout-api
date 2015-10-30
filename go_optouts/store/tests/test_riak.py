@@ -53,6 +53,17 @@ class TestRiakOptOutCollection(VumiTestCase):
         collection = RiakOptOutCollection(store)
         returnValue((store, collection))
 
+    def assertStoreAndCollectionEqual(
+            self, opt_store, opt_collection, message, user_account):
+        store_data = opt_store.get_data()
+        self.assertEqual(store_data["message"], message)
+        self.assertEqual(store_data["user_account"], user_account)
+        self.assertEqual(opt_collection, {
+            'created_at': store_data.get('created_at'),
+            'message': message,
+            'user_account': user_account,
+        })
+
     def test_class_iface(self):
         self.assertTrue(verifyClass(IOptOutCollection, RiakOptOutCollection))
 
@@ -64,17 +75,40 @@ class TestRiakOptOutCollection(VumiTestCase):
     @inlineCallbacks
     def test_get_opt_out_exists(self):
         store, collection = yield self.mk_collection("owner-1")
-        opt_out_1 = yield store.new_opt_out(
-            "msisdn", "+12345", {"message_id": "FIXME"})
-        opt_out_2 = yield collection.get("msisdn", "+12345")
-        self.assertEqual(opt_out_2, {
-            'created_at': opt_out_1.get_data().get('created_at'),
-            'message': u'FIXME',
-            'user_account': u'owner-1',
-        })
+        opt_out_store = yield store.new_opt_out(
+            "msisdn", "+12345", {"message_id": "dummy-id"})
+        opt_out_coll = yield collection.get("msisdn", "+12345")
+        self.assertStoreAndCollectionEqual(
+            opt_out_store, opt_out_coll,
+            message=u'dummy-id', user_account=u'owner-1')
 
     @inlineCallbacks
     def test_get_opt_out_absent(self):
         store, collection = yield self.mk_collection("owner-1")
         opt_out = yield collection.get("msisdn", "+12345")
         self.assertEqual(opt_out, None)
+
+    @inlineCallbacks
+    def test_put_opt_out_new(self):
+        store, collection = yield self.mk_collection("owner-1")
+        opt_out_coll = yield collection.put("msisdn", "+12345")
+        opt_out_store = yield store.get_opt_out("msisdn", "+12345")
+        self.assertStoreAndCollectionEqual(
+            opt_out_store, opt_out_coll,
+            message=None, user_account=u'owner-1')
+
+    @inlineCallbacks
+    def test_delete_opt_out_exists(self):
+        store, collection = yield self.mk_collection("owner-1")
+        opt_out_store = yield store.new_opt_out(
+            "msisdn", "+12345", {"message_id": "dummy-id"})
+        opt_out_coll = yield collection.delete("msisdn", "+12345")
+        self.assertStoreAndCollectionEqual(
+            opt_out_store, opt_out_coll,
+            message=u'dummy-id', user_account=u'owner-1')
+
+    @inlineCallbacks
+    def test_delete_opt_out_absent(self):
+        store, collection = yield self.mk_collection("owner-1")
+        opt_out_coll = yield collection.delete("msisdn", "+12345")
+        self.assertEqual(opt_out_coll, None)
