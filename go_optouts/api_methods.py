@@ -52,11 +52,6 @@ class API(object):
 
 # Methods
 
-    @app.route('/')
-    def addresses(self, request):
-            request.setHeader('Content-Type', 'application/json')
-            return json.dumps(self._info)
-
     @app.route('/optouts/<string:addresstype>/<string:address>',
                methods=['GET'])
     def get_address(self, request, addresstype, address):
