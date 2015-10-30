@@ -3,6 +3,10 @@ import json
 from klein import Klein
 
 
+class OwnerIdNotValid(Exception):
+    """ Raised when no valid owner is found. """
+
+
 class OptOutNotFound(Exception):
     """ Raised when no opt out is found. """
 
@@ -33,9 +37,17 @@ class API(object):
         return json.dumps(data)
 
     def collection(self, request):
-        return self._backend.get_opt_out_collection("owner-1")
+        owner_id = request.getHeader('X-Owner-ID')
+        if owner_id is None:
+            raise OwnerIdNotValid()
+        return self._backend.get_opt_out_collection(owner_id)
 
 # Error Handling
+
+    @app.handle_errors(OwnerIdNotValid)
+    def owner_id_not_valid(self, request, failure):
+        return self.response(
+            request, status_code=401, status_reason="Owner ID not valid.")
 
     @app.handle_errors(OptOutNotFound)
     def opt_out_not_found(self, request, failure):

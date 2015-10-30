@@ -30,23 +30,35 @@ class TestApi(TestCase):
     def stop_server(self):
         yield self.server.loseConnection()
 
-    def _api_call(self, handler, path):
+    def _api_call(self, handler, path, owner=True):
         url = "%s%s" % (self.url, path)
-        headers = {
-            "X-Owner-ID": self.owner_id,
-        }
+        headers = {}
+        if owner:
+            headers["X-Owner-ID"] = self.owner_id
         return handler(url, headers=headers, persistent=False)
 
-    def api_get(self, path):
-        return self._api_call(treq.get, path)
+    def api_get(self, path, **kw):
+        return self._api_call(treq.get, path, **kw)
 
-    def api_put(self, path):
-        return self._api_call(treq.put, path)
+    def api_put(self, path, **kw):
+        return self._api_call(treq.put, path, **kw)
 
-    def api_delete(self, path):
-        return self._api_call(treq.delete, path)
+    def api_delete(self, path, **kw):
+        return self._api_call(treq.delete, path, **kw)
 
 # Tests
+
+    @inlineCallbacks
+    def test_no_owner(self):
+        resp = yield self.api_get("/optouts/count", owner=False)
+        self.assertEqual(resp.code, 401)
+        data = yield resp.json()
+        self.assertEqual(data, {
+            "status": {
+                "code": 401,
+                "reason": "Owner ID not valid.",
+            },
+        })
 
     @inlineCallbacks
     def test_opt_out_found(self):
