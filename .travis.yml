@@ -18,8 +18,12 @@ before_install:
 install:
   - "pip install -r requirements.txt --use-wheel"
   - "pip install -e ."
+  - "pip install coveralls"
+before_script:
   # To see what version of Riak we're running and check that it's happy.
   - riak version
   - riak-admin member-status
 script:
-  - trial go_optouts
+  - coverage run --source=go_optouts `which trial` go_optouts
+after_success:
+  - coveralls
