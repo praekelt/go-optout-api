@@ -1,9 +1,31 @@
-from zope.interface import implements
-from interface import IOptOutStore
 import uuid
 
+from zope.interface import implements
 
-class OptOutMemory(object):
+from .interface import IOptOutBackend, IOptOutCollection
+
+
+class MemoryOptOutBackend(object):
+    """ Memory opt out backend. """
+
+    implements(IOptOutBackend)
+
+    def __init__(self):
+        self._collections = {}
+
+    def get_opt_out_collection(self, owner_id):
+        """ Return the opt out collection for the specified owner.
+
+        :param str owner_id:
+            The id of the owner of the opt out store.
+        """
+        collection = self._collections.get(owner_id)
+        if collection is None:
+            collection = self._collections[owner_id] = MemoryOptOutCollection()
+        return collection
+
+
+class MemoryOptOutCollection(object):
     """
     This implements the IOptOutStore interface.
 
@@ -17,7 +39,7 @@ class OptOutMemory(object):
         }
     """
 
-    implements(IOptOutStore)
+    implements(IOptOutCollection)
 
     def __init__(self):
         # _store maps (address_type, address) pairs to opt outs

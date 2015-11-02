@@ -1,6 +1,6 @@
 from api_methods import API
-from store.memory import OptOutMemory
+from store.memory import MemoryOptOutCollection
 
-app = API(OptOutMemory())
+app = API(MemoryOptOutCollection())
 
 app.app.run('localhost', 8080)

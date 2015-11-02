@@ -4,7 +4,7 @@ from twisted.trial.unittest import TestCase
 from twisted.web.server import Site
 from twisted.internet import reactor
 from twisted.internet.defer import inlineCallbacks
-from go_optouts.store.memory import OptOutMemory
+from go_optouts.store.memory import MemoryOptOutCollection
 
 
 class TestApi(TestCase):
@@ -18,7 +18,7 @@ class TestApi(TestCase):
 
     @inlineCallbacks
     def start_server(self):
-        self.backend = OptOutMemory()
+        self.backend = MemoryOptOutCollection()
         self.app = API(self.backend)
         self.server = yield reactor.listenTCP(0, Site(self.app.app.resource()))
         addr = self.server.getHost()

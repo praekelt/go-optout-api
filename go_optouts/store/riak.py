@@ -1,8 +1,11 @@
 """ Riak opt out backend. """
 
 from twisted.internet.defer import inlineCallbacks, returnValue
+from zope.interface import implements
 
 from go.vumitools.opt_out import OptOutStore, OptOut
+
+from .interface import IOptOutBackend, IOptOutCollection
 
 
 class RiakOptOutBackend(object):
@@ -14,8 +17,7 @@ class RiakOptOutBackend(object):
         A Riak manager for the opt out stores.
     """
 
-    # TODO: this should declare that it implements the
-    #       opt out backend interface
+    implements(IOptOutBackend)
 
     def __init__(self, riak_manager):
         self.riak_manager = riak_manager
@@ -39,8 +41,7 @@ class RiakOptOutCollection(object):
         The opt out store to provide access to.
     """
 
-    # TODO: this should declare that it implements the
-    #       opt out collection interface
+    implements(IOptOutCollection)
 
     def __init__(self, opt_out_store):
         self.store = opt_out_store
@@ -63,24 +64,33 @@ class RiakOptOutCollection(object):
             opt_out.get_data(), OptOut.field_descriptors.keys())
 
     @inlineCallbacks
-    def get_opt_out(self, addresstype, address):
+    def get(self, addresstype, address):
         opt_out = yield self.store.get_opt_out(addresstype, address)
         if opt_out is None:
             returnValue(None)
         returnValue(self._opt_out_to_dict(opt_out))
 
     @inlineCallbacks
-    def save_opt_out(self, addresstype, address):
+    def put(self, addresstype, address):
         opt_out = yield self.store.new_opt_out(
             addresstype, address, message={
-                'message_id': None,  # TODO: fix opt out store
+                # TODO: Fix the Vumi Go opt out store to allow descriptions
+                #       of why an address was opted out. Currently the only
+                #       description allowed is a Vumi message id. :|
+                'message_id': None,
             })
         returnValue(self._opt_out_to_dict(opt_out))
 
     @inlineCallbacks
-    def delete_opt_out(self, addresstype, address):
+    def delete(self, addresstype, address):
         opt_out = yield self.store.get_opt_out(addresstype, address)
         if opt_out is None:
             returnValue(None)
+        opt_out_dict = self._opt_out_to_dict(opt_out)
         yield opt_out.delete()
-        returnValue(opt_out)
+        returnValue(opt_out_dict)
+
+    @inlineCallbacks
+    def count(self):
+        count = yield self.store.count()
+        returnValue(count)
