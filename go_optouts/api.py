@@ -3,6 +3,10 @@ import json
 from klein import Klein
 
 
+class OwnerIdNotValid(Exception):
+    """ Raised when no valid owner is found. """
+
+
 class OptOutNotFound(Exception):
     """ Raised when no opt out is found. """
 
@@ -32,7 +36,18 @@ class API(object):
         })
         return json.dumps(data)
 
+    def collection(self, request):
+        owner_id = request.getHeader('X-Owner-ID')
+        if owner_id is None:
+            raise OwnerIdNotValid()
+        return self._backend.get_opt_out_collection(owner_id)
+
 # Error Handling
+
+    @app.handle_errors(OwnerIdNotValid)
+    def owner_id_not_valid(self, request, failure):
+        return self.response(
+            request, status_code=401, status_reason="Owner ID not valid.")
 
     @app.handle_errors(OptOutNotFound)
     def opt_out_not_found(self, request, failure):
@@ -55,7 +70,8 @@ class API(object):
     @app.route('/optouts/<string:addresstype>/<string:address>',
                methods=['GET'])
     def get_address(self, request, addresstype, address):
-        opt_out = self._backend.get(addresstype, address)
+        collection = self.collection(request)
+        opt_out = collection.get(addresstype, address)
         if opt_out is None:
             raise OptOutNotFound()
         return self.response(request, opt_out=opt_out)
@@ -63,21 +79,24 @@ class API(object):
     @app.route('/optouts/<string:addresstype>/<string:address>',
                methods=['PUT'])
     def save_address(self, request, addresstype, address):
-        opt_out = self._backend.get(addresstype, address)
+        collection = self.collection(request)
+        opt_out = collection.get(addresstype, address)
         if opt_out is not None:
             raise OptOutAlreadyExists()
-        opt_out = self._backend.put(addresstype, address)
+        opt_out = collection.put(addresstype, address)
         return self.response(request, opt_out=opt_out)
 
     @app.route('/optouts/<string:addresstype>/<string:address>',
                methods=['DELETE'])
     def delete_address(self, request, addresstype, address):
-        opt_out = self._backend.delete(addresstype, address)
+        collection = self.collection(request)
+        opt_out = collection.delete(addresstype, address)
         if opt_out is None:
             raise OptOutNotDeleted()
         return self.response(request, opt_out=opt_out)
 
     @app.route('/optouts/count', methods=['GET'])
     def get_opt_out_count(self, request):
-        count = self._backend.count()
+        collection = self.collection(request)
+        count = collection.count()
         return self.response(request, opt_out_count=count)
