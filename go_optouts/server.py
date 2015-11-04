@@ -57,7 +57,7 @@ class ApiSiteConfig(Config):
     def post_validate(self):
         if self.backend not in self.BACKENDS:
             self.raise_config_error(
-                "Backend must be one of %s" % ", ".join(self.BACKENDS.keys()))
+                "Backend must be one of: %s" % ", ".join(self.BACKENDS.keys()))
 
     def create_backend(self):
         return self.BACKENDS[self.backend].from_config(self.backend_config)
@@ -68,8 +68,7 @@ class ApiSite(object):
 
     def __init__(self, config_file=None):
         self.config = ApiSiteConfig(read_yaml_config(config_file))
-        self.backend = self.config.create_backend()
-        self.api = API(self.backend)
+        self.api = API(self.config.create_backend())
         self.site = build_web_site({
             'health': HealthResource(),
             self.config.url_path_prefix: self.api.app.resource(),

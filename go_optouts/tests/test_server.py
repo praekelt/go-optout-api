@@ -3,9 +3,12 @@ import yaml
 from twisted.internet.defer import inlineCallbacks
 from twisted.web.server import Site
 
+from confmodel.errors import ConfigError
+
 from vumi.tests.helpers import VumiTestCase, PersistenceHelper
 
-from go_optouts.server import HealthResource, read_yaml_config, ApiSite
+from go_optouts.server import (
+    HealthResource, read_yaml_config, ApiSiteConfig, ApiSite)
 from go_optouts.store.memory import MemoryOptOutBackend
 from go_optouts.store.riak import RiakOptOutBackend
 from go_optouts.tests.utils import SiteHelper
@@ -46,6 +49,62 @@ class TestReadYamlConfig(VumiTestCase):
     def test_optional_config(self):
         data = read_yaml_config(None)
         self.assertEqual(data, {})
+
+
+class TestApiSiteConfig(VumiTestCase):
+
+    def setUp(self):
+        self.persistence_helper = self.add_helper(
+            PersistenceHelper(use_riak=True, is_sync=False))
+
+    def test_backend_memory(self):
+        cfg = ApiSiteConfig({"backend": "memory"})
+        self.assertEqual(cfg.backend, "memory")
+
+    def test_backend_riak(self):
+        cfg = ApiSiteConfig({"backend": "riak"})
+        self.assertEqual(cfg.backend, "riak")
+
+    def test_backend_required(self):
+        err = self.assertRaises(ConfigError, ApiSiteConfig, {})
+        self.assertEqual(str(err), "Missing required config field 'backend'")
+
+    def test_unknown_backend(self):
+        err = self.assertRaises(ConfigError, ApiSiteConfig, {"backend": "bad"})
+        self.assertEqual(str(err), "Backend must be one of: riak, memory")
+
+    def test_backend_config(self):
+        cfg = ApiSiteConfig({"backend": "memory", "backend_config": {
+            "camelot": "ham",
+        }})
+        self.assertEqual(cfg.backend_config, {"camelot": "ham"})
+
+    def test_backend_config_optional(self):
+        cfg = ApiSiteConfig({"backend": "memory"})
+        self.assertEqual(cfg.backend_config, {})
+
+    def test_url_path_prefix(self):
+        cfg = ApiSiteConfig({
+            "backend": "memory", "url_path_prefix": "flashing/red/light"})
+        self.assertEqual(cfg.url_path_prefix, "flashing/red/light")
+
+    def test_url_path_prefix_optional(self):
+        cfg = ApiSiteConfig({"backend": "memory"})
+        self.assertEqual(cfg.url_path_prefix, "optouts")
+
+    def test_create_backend_memory(self):
+        cfg = ApiSiteConfig({"backend": "memory"})
+        backend = cfg.create_backend()
+        self.assertTrue(isinstance(backend, MemoryOptOutBackend))
+
+    def test_create_backend_riak(self):
+        backend_config = self.persistence_helper.mk_config({})['riak_manager']
+        cfg = ApiSiteConfig({
+            "backend": "riak",
+            "backend_config": backend_config,
+        })
+        backend = cfg.create_backend()
+        self.assertTrue(isinstance(backend, RiakOptOutBackend))
 
 
 class TestApiSite(VumiTestCase):
@@ -116,7 +175,7 @@ class TestApiSite(VumiTestCase):
 
     def test_memory_backend(self):
         api_site = self.mk_api_site({"backend": "memory"})
-        backend = api_site.backend
+        backend = api_site.api._backend
         self.assertTrue(isinstance(backend, MemoryOptOutBackend))
 
     def test_riak_backend(self):
@@ -125,7 +184,7 @@ class TestApiSite(VumiTestCase):
             "backend": "riak",
             "backend_config": config,
         })
-        backend = api_site.backend
+        backend = api_site.api._backend
         self.assertTrue(isinstance(backend, RiakOptOutBackend))
         self.assertEqual(
             backend.riak_manager.bucket_prefix, config["bucket_prefix"])
