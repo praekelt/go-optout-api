@@ -5,12 +5,16 @@ from twisted.python import log
 from twisted.web import http
 from twisted.web.resource import Resource
 
+from confmodel import Config
+from confmodel.fields import ConfigText, ConfigDict
+
 from vumi.utils import build_web_site
 
 import yaml
 
 from .api import API
 from .store.memory import MemoryOptOutBackend
+from .store.riak import RiakOptOutBackend
 
 
 class HealthResource(Resource):
@@ -31,25 +35,45 @@ def read_yaml_config(config_file):
         return yaml.safe_load(stream)
 
 
+class ApiSiteConfig(Config):
+
+    BACKENDS = {
+        "memory": MemoryOptOutBackend,
+        "riak": RiakOptOutBackend,
+    }
+
+    backend = ConfigText(
+        "Optout backend to use. One of 'memory' or 'riak'",
+        required=True)
+
+    backend_config = ConfigDict(
+        "Configuration for backend.",
+        default={})
+
+    url_path_prefix = ConfigText(
+        "URL path prefix for the optout API.",
+        default="optouts")
+
+    def post_validate(self):
+        if self.backend not in self.BACKENDS:
+            self.raise_config_error(
+                "Backend must be one of %s" % ", ".join(self.BACKENDS.keys()))
+
+    def create_backend(self):
+        return self.BACKENDS[self.backend].from_config(self.backend_config)
+
+
 class ApiSite(object):
     """ Site for serving the opt out API. """
 
     def __init__(self, config_file=None):
-        self.config = read_yaml_config(config_file)
-        self.backend = self._backend_from_config(self.config)
+        self.config = ApiSiteConfig(read_yaml_config(config_file))
+        self.backend = self.config.create_backend()
         self.api = API(self.backend)
-        url_path_prefix = self._url_path_prefix_from_config(self.config)
         self.site = build_web_site({
             'health': HealthResource(),
-            url_path_prefix: self.api.app.resource(),
+            self.config.url_path_prefix: self.api.app.resource(),
         })
-
-    def _backend_from_config(self, config):
-        return MemoryOptOutBackend()
-
-    def _url_path_prefix_from_config(self, config):
-        prefix = config.get('url_path_prefix')
-        return prefix or "optouts"
 
     def run(self, host, port):
         log.startLogging(sys.stdout)
