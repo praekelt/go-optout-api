@@ -78,8 +78,3 @@ class ApiSite(object):
         log.startLogging(sys.stdout)
         reactor.listenTCP(port, self.site, interface=host)
         reactor.run()
-
-
-if __name__ == "__main__":
-    site = ApiSite()
-    site.run('localhost', 8080)
