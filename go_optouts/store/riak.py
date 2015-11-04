@@ -4,6 +4,7 @@ from twisted.internet.defer import inlineCallbacks, returnValue
 from zope.interface import implements
 
 from go.vumitools.opt_out import OptOutStore, OptOut
+from vumi.persist.txriak_manager import TxRiakManager
 
 from .interface import IOptOutBackend, IOptOutCollection
 
@@ -21,6 +22,11 @@ class RiakOptOutBackend(object):
 
     def __init__(self, riak_manager):
         self.riak_manager = riak_manager
+
+    @classmethod
+    def from_config(cls, config):
+        riak_manager = TxRiakManager.from_config(config)
+        return cls(riak_manager)
 
     def get_opt_out_collection(self, owner_id):
         """ Return the opt out collection for the specified owner.
