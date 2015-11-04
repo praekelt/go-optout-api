@@ -5,11 +5,20 @@ import click
 from .server import ApiSite
 
 
-@click.command()
+@click.command("go-optouts")
 @click.version_option()
-@click.option('--config', '-c', help='YAML config file')
-@click.option('--host', '-h', default='localhost')
-@click.option('--port', '-p', type=int, default=8080)
+@click.option(
+    '--config', '-c',
+    required=True,
+    help='YAML config file')
+@click.option(
+    '--host', '-h',
+    default='localhost',
+    help='Host to listen on')
+@click.option(
+    '--port', '-p',
+    type=int, default=8080,
+    help='Port to listen on')
 def run(config, host, port):
     """ Vumi Go Opt Out API. """
     site = ApiSite(config)
