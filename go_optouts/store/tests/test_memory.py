@@ -20,6 +20,10 @@ class TestMemoryOptOutBackend(TestCase):
         backend = self.mk_backend()
         self.assertTrue(verifyObject(IOptOutBackend, backend))
 
+    def test_from_config(self):
+        backend = MemoryOptOutBackend.from_config({})
+        self.assertTrue(isinstance(backend, MemoryOptOutBackend))
+
     def test_get_opt_out_collection(self):
         backend = self.mk_backend()
         collection = backend.get_opt_out_collection("owner-1")

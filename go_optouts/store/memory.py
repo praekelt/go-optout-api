@@ -13,6 +13,10 @@ class MemoryOptOutBackend(object):
     def __init__(self):
         self._collections = {}
 
+    @classmethod
+    def from_config(cls, _config):
+        return cls()
+
     def get_opt_out_collection(self, owner_id):
         """ Return the opt out collection for the specified owner.
 

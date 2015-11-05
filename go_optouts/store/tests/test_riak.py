@@ -33,6 +33,13 @@ class TestRiakOptOutBackend(VumiTestCase):
         backend = yield self.mk_backend()
         self.assertTrue(verifyObject(IOptOutBackend, backend))
 
+    def test_from_config(self):
+        config = self.persistence_helper.mk_config({})["riak_manager"]
+        backend = RiakOptOutBackend.from_config(config)
+        self.assertTrue(isinstance(backend, RiakOptOutBackend))
+        self.assertEqual(
+            backend.riak_manager.bucket_prefix, config["bucket_prefix"])
+
     @inlineCallbacks
     def test_get_opt_out_collection(self):
         backend = yield self.mk_backend()

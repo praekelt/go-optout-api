@@ -12,12 +12,18 @@ setup(
     packages=find_packages(),
     include_package_data=True,
     install_requires=[
+        'click',
         'klein',
         'treq',
         'Twisted>=13.1.0',
+        'PyYAML',
         'vumi>=0.5.4',
         'vumi-go',
     ],
+    entry_points="""
+        [console_scripts]
+        go-optouts=go_optouts.main:run
+    """,
     classifiers=[
         'Development Status :: 4 - Beta',
         'Intended Audience :: Developers',

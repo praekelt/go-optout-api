@@ -67,7 +67,7 @@ class API(object):
 
 # Methods
 
-    @app.route('/optouts/<string:addresstype>/<string:address>',
+    @app.route('/<string:addresstype>/<string:address>',
                methods=['GET'])
     def get_address(self, request, addresstype, address):
         collection = self.collection(request)
@@ -76,7 +76,7 @@ class API(object):
             raise OptOutNotFound()
         return self.response(request, opt_out=opt_out)
 
-    @app.route('/optouts/<string:addresstype>/<string:address>',
+    @app.route('/<string:addresstype>/<string:address>',
                methods=['PUT'])
     def save_address(self, request, addresstype, address):
         collection = self.collection(request)
@@ -86,7 +86,7 @@ class API(object):
         opt_out = collection.put(addresstype, address)
         return self.response(request, opt_out=opt_out)
 
-    @app.route('/optouts/<string:addresstype>/<string:address>',
+    @app.route('/<string:addresstype>/<string:address>',
                methods=['DELETE'])
     def delete_address(self, request, addresstype, address):
         collection = self.collection(request)
@@ -95,7 +95,7 @@ class API(object):
             raise OptOutNotDeleted()
         return self.response(request, opt_out=opt_out)
 
-    @app.route('/optouts/count', methods=['GET'])
+    @app.route('/count', methods=['GET'])
     def get_opt_out_count(self, request):
         collection = self.collection(request)
         count = collection.count()
