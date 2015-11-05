@@ -47,12 +47,27 @@ class TestCli(VumiTestCase):
         runner = CliRunner()
         result = runner.invoke(run, [
             '--config', cfg_file,
-            '--host', 'localhost',
+            '--host', '127.0.0.1',
             '--port', '8000',
         ])
         self.assertEqual(result.exit_code, 0)
         [run_call] = self.run_calls
         [site, host, port] = run_call
         self.assertTrue(isinstance(site.api._backend, MemoryOptOutBackend))
-        self.assertEqual(host, 'localhost')
+        self.assertEqual(host, '127.0.0.1')
         self.assertEqual(port, 8000)
+
+    def test_run_default_parameters(self):
+        cfg_file = self.mktemp()
+        with open(cfg_file, "wb") as f:
+            f.write("backend: memory")
+        runner = CliRunner()
+        result = runner.invoke(run, [
+            '--config', cfg_file,
+        ])
+        self.assertEqual(result.exit_code, 0)
+        [run_call] = self.run_calls
+        [site, host, port] = run_call
+        self.assertTrue(isinstance(site.api._backend, MemoryOptOutBackend))
+        self.assertEqual(host, 'localhost')
+        self.assertEqual(port, 8080)
