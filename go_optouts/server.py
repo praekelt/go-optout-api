@@ -27,7 +27,7 @@ class HealthResource(Resource):
 
 
 def read_yaml_config(config_file):
-    """Parse an (usually) optional YAML config file."""
+    """Parse a YAML config file."""
     if config_file is None:
         return {}
     with file(config_file, 'r') as stream:
