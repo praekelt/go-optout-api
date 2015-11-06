@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name="go-optouts",
-    version="0.0.1a",
+    version="0.1.0",
     url='http://github.com/praekelt/go-optouts-api',
     license='BSD',
     description="An API for managing Vumi Go opt outs.",
