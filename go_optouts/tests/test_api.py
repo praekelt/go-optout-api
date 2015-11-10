@@ -44,7 +44,7 @@ class TestApi(VumiTestCase):
 
     @inlineCallbacks
     def test_opt_out_found(self):
-        existing_opt_out = self.collection.put("msisdn", "+273121100")
+        existing_opt_out = yield self.collection.put("msisdn", "+273121100")
         resp = yield self.site_helper.get("/msisdn/+273121100")
         self.assertEqual(resp.code, 200)
         data = yield resp.json()
@@ -75,7 +75,7 @@ class TestApi(VumiTestCase):
     @inlineCallbacks
     def test_opt_out_created(self):
         resp = yield self.site_helper.put("/msisdn/+273121100")
-        created_opt_out = self.collection.get("msisdn", "+273121100")
+        created_opt_out = yield self.collection.get("msisdn", "+273121100")
         self.assertEqual(resp.code, 200)
         data = yield resp.json()
         self.assertEqual(data, {
@@ -92,7 +92,7 @@ class TestApi(VumiTestCase):
 
     @inlineCallbacks
     def test_opt_out_conflict(self):
-        self.collection.put("msisdn", "+273121100")
+        yield self.collection.put("msisdn", "+273121100")
         response = yield self.site_helper.put("/msisdn/+273121100")
         self.assertEqual(response.code, 409)
         data = yield response.json()
@@ -105,7 +105,7 @@ class TestApi(VumiTestCase):
 
     @inlineCallbacks
     def test_opt_out_deleted(self):
-        delete_opt_out = self.collection.put("whatsapp", "@whatsup")
+        delete_opt_out = yield self.collection.put("whatsapp", "@whatsup")
         resp = yield self.site_helper.delete("/whatsapp/@whatsup")
         self.assertEqual(resp.code, 200)
         data = yield resp.json()
@@ -148,8 +148,8 @@ class TestApi(VumiTestCase):
 
     @inlineCallbacks
     def test_opt_out_count_two_opt_outs(self):
-        self.collection.put("slack", "@slack")
-        self.collection.put("twitter_handle", "@trevor_october")
+        yield self.collection.put("slack", "@slack")
+        yield self.collection.put("twitter_handle", "@trevor_october")
         resp = yield self.site_helper.get("/count")
         self.assertEqual(resp.code, 200)
         data = yield resp.json()
@@ -163,9 +163,9 @@ class TestApi(VumiTestCase):
 
     @inlineCallbacks
     def test_opt_out_count_three_opt_outs(self):
-        self.collection.put("whatsapp", "+27782635432")
-        self.collection.put("mxit", "@trevor_mxit")
-        self.collection.put("facebook", "fb")
+        yield self.collection.put("whatsapp", "+27782635432")
+        yield self.collection.put("mxit", "@trevor_mxit")
+        yield self.collection.put("facebook", "fb")
         resp = yield self.site_helper.get("/count")
         self.assertEqual(resp.code, 200)
         data = yield resp.json()

@@ -75,7 +75,7 @@ class API(object):
     @inlineCallbacks
     def get_address(self, request, addresstype, address):
         collection = yield self.collection(request)
-        opt_out = collection.get(addresstype, address)
+        opt_out = yield collection.get(addresstype, address)
         if opt_out is None:
             raise OptOutNotFound()
         returnValue(self.response(request, opt_out=opt_out))
@@ -85,10 +85,10 @@ class API(object):
     @inlineCallbacks
     def save_address(self, request, addresstype, address):
         collection = yield self.collection(request)
-        opt_out = collection.get(addresstype, address)
+        opt_out = yield collection.get(addresstype, address)
         if opt_out is not None:
             raise OptOutAlreadyExists()
-        opt_out = collection.put(addresstype, address)
+        opt_out = yield collection.put(addresstype, address)
         returnValue(self.response(request, opt_out=opt_out))
 
     @app.route('/<string:addresstype>/<string:address>',
@@ -96,7 +96,7 @@ class API(object):
     @inlineCallbacks
     def delete_address(self, request, addresstype, address):
         collection = yield self.collection(request)
-        opt_out = collection.delete(addresstype, address)
+        opt_out = yield collection.delete(addresstype, address)
         if opt_out is None:
             raise OptOutNotDeleted()
         returnValue(self.response(request, opt_out=opt_out))
@@ -105,5 +105,5 @@ class API(object):
     @inlineCallbacks
     def get_opt_out_count(self, request):
         collection = yield self.collection(request)
-        count = collection.count()
+        count = yield collection.count()
         returnValue(self.response(request, opt_out_count=count))
