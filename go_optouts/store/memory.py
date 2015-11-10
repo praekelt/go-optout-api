@@ -1,5 +1,6 @@
 import uuid
 
+from twisted.internet.defer import succeed
 from zope.interface import implements
 
 from .interface import IOptOutBackend, IOptOutCollection
@@ -51,7 +52,7 @@ class MemoryOptOutCollection(object):
 
     def get(self, address_type, address):
         key = (address_type, address)
-        return self._store.get(key)
+        return succeed(self._store.get(key))
 
     def put(self, address_type, address):
         key = (address_type, address)
@@ -61,11 +62,11 @@ class MemoryOptOutCollection(object):
             'address_type': address_type,
             'address': address
         }
-        return self._store.get(key)
+        return succeed(self._store.get(key))
 
     def delete(self, address_type, address):
         key = (address_type, address)
-        return self._store.pop(key, None)
+        return succeed(self._store.pop(key, None))
 
     def count(self):
-        return len(self._store)
+        return succeed(len(self._store))
