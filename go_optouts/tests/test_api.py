@@ -4,6 +4,7 @@ from twisted.internet.defer import inlineCallbacks
 from vumi.tests.helpers import VumiTestCase
 
 from go_optouts.api import API
+from go_optouts.auth import RequestHeaderAuth
 from go_optouts.store.memory import MemoryOptOutBackend
 from go_optouts.tests.utils import SiteHelper
 
@@ -13,8 +14,9 @@ class TestApi(VumiTestCase):
     def setUp(self):
         self.owner_id = "owner-1"
         self.backend = MemoryOptOutBackend()
+        self.auth = RequestHeaderAuth()
         self.collection = self.backend.get_opt_out_collection(self.owner_id)
-        self.app = API(self.backend)
+        self.app = API(self.backend, self.auth)
         self.site = Site(self.app.app.resource())
 
         self.site_helper = yield self.add_helper(
