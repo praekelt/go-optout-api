@@ -9,6 +9,7 @@ from vumi.tests.helpers import VumiTestCase, PersistenceHelper
 
 from go_optouts.server import (
     HealthResource, read_yaml_config, ApiSiteConfig, ApiSite)
+from go_optouts.auth import RequestHeaderAuth, BouncerAuth
 from go_optouts.store.memory import MemoryOptOutBackend
 from go_optouts.store.riak import RiakOptOutBackend
 from go_optouts.tests.utils import SiteHelper
@@ -92,6 +93,15 @@ class TestApiSiteConfig(VumiTestCase):
         cfg = ApiSiteConfig({"backend": "memory"})
         self.assertEqual(cfg.url_path_prefix, "optouts")
 
+    def test_auth_bouncer_url(self):
+        cfg = ApiSiteConfig({
+            "backend": "memory", "auth_bouncer_url": "http://example.com/"})
+        self.assertEqual(cfg.auth_bouncer_url, "http://example.com/")
+
+    def test_auth_bouncer_url_optional(self):
+        cfg = ApiSiteConfig({"backend": "memory"})
+        self.assertEqual(cfg.auth_bouncer_url, None)
+
     def test_create_backend_memory(self):
         cfg = ApiSiteConfig({"backend": "memory"})
         backend = cfg.create_backend()
@@ -105,6 +115,18 @@ class TestApiSiteConfig(VumiTestCase):
         })
         backend = cfg.create_backend()
         self.assertTrue(isinstance(backend, RiakOptOutBackend))
+
+    def test_create_auth_request_headers(self):
+        cfg = ApiSiteConfig({"backend": "memory"})
+        auth = cfg.create_auth()
+        self.assertTrue(isinstance(auth, RequestHeaderAuth))
+
+    def test_create_auth_bouncer(self):
+        cfg = ApiSiteConfig({
+            "backend": "memory", "auth_bouncer_url": "http://example.com/"})
+        auth = cfg.create_auth()
+        self.assertTrue(isinstance(auth, BouncerAuth))
+        self.assertEqual(auth._auth_bouncer_url, "http://example.com")
 
 
 class TestApiSite(VumiTestCase):
@@ -188,3 +210,17 @@ class TestApiSite(VumiTestCase):
         self.assertTrue(isinstance(backend, RiakOptOutBackend))
         self.assertEqual(
             backend.riak_manager.bucket_prefix, config["bucket_prefix"])
+
+    def test_auth_request_headers(self):
+        api_site = self.mk_api_site({"backend": "memory"})
+        auth = api_site.api._auth
+        self.assertTrue(isinstance(auth, RequestHeaderAuth))
+
+    def test_auth_bouncer(self):
+        api_site = self.mk_api_site({
+            "backend": "memory",
+            "auth_bouncer_url": "http://example.com/",
+        })
+        auth = api_site.api._auth
+        self.assertTrue(isinstance(auth, BouncerAuth))
+        self.assertEqual(auth._auth_bouncer_url, "http://example.com")
