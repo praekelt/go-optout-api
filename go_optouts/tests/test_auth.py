@@ -52,23 +52,23 @@ class DummyAuthResource(Resource):
     isLeaf = True
 
     def __init__(self):
-        self._requests = []
-        self._responses = []
+        self.requests = []
+        self.responses = []
 
     def add_response(self, code=401, body="Unauthorized", owner_id=None):
-        self._responses.append({
+        self.responses.append({
             'code': code,
             'body': body,
             'owner_id': owner_id
         })
 
     def pop_response(self):
-        if not self._responses:
+        if not self.responses:
             self.add_response()
-        return self._responses.pop(0)
+        return self.responses.pop(0)
 
     def render(self, request):
-        self._requests.append(request)
+        self.requests.append(request)
         response = self.pop_response()
         request.setResponseCode(response['code'])
         if response['owner_id']:
@@ -103,6 +103,8 @@ class TestBouncerAuth(VumiTestCase):
         owner_id_d = auth.owner_id(request)
         self.assertTrue(isinstance(owner_id_d, Deferred))
         self.assertEqual((yield owner_id_d), "owner-1")
+        [auth_request] = self.auth_resource.requests
+        self.assertEqual(auth_request.uri, '/foo')
 
     @inlineCallbacks
     def test_auth_failed(self):
@@ -111,3 +113,22 @@ class TestBouncerAuth(VumiTestCase):
         owner_id_d = auth.owner_id(request)
         self.assertTrue(isinstance(owner_id_d, Deferred))
         self.assertEqual((yield owner_id_d), None)
+        [auth_request] = self.auth_resource.requests
+        self.assertEqual(auth_request.uri, '/foo')
+
+    @inlineCallbacks
+    def test_auth_headers_proxied(self):
+        auth = BouncerAuth(self.auth_url)
+        request = mk_request(
+            path="/foo", headers={'Authorization': 'token'})
+        yield auth.owner_id(request)
+        [auth_request] = self.auth_resource.requests
+        self.assertEqual(auth_request.getHeader('Authorization'), 'token')
+
+    @inlineCallbacks
+    def test_auth_headers_absent(self):
+        auth = BouncerAuth(self.auth_url)
+        request = mk_request(path="/foo")
+        yield auth.owner_id(request)
+        [auth_request] = self.auth_resource.requests
+        self.assertEqual(auth_request.getHeader('Authorization'), None)
